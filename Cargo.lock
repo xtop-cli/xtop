@@ -2140,7 +2140,7 @@ dependencies = [
 [[package]]
 name = "xtop-plugin-api"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/api#865e7b9baa2bc03dcc1f95c77e5066d31d678c9a"
+source = "git+https://github.com/xtop-cli/api#9aa60d6ecfce46c56afb7ed759803769a7b65d4f"
 dependencies = [
  "ratatui",
  "serde",
@@ -2149,6 +2149,7 @@ dependencies = [
 [[package]]
 name = "xtop-plugin-external"
 version = "0.1.0"
+source = "git+https://github.com/xtop-cli/plugins#1ed3ed4c1103b165c46268b6c4ce16d82c79ad95"
 dependencies = [
  "ratatui",
  "serde",
@@ -2161,7 +2162,7 @@ dependencies = [
 [[package]]
 name = "xtop-plugin-samurai"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/plugins#8b474d606df07d3a113c22e559cea138cb76251f"
+source = "git+https://github.com/xtop-cli/plugins#1ed3ed4c1103b165c46268b6c4ce16d82c79ad95"
 dependencies = [
  "ratatui",
  "regex",
@@ -2173,6 +2174,7 @@ dependencies = [
 [[package]]
 name = "xtop-plugin-wasm"
 version = "0.1.0"
+source = "git+https://github.com/xtop-cli/plugins#1ed3ed4c1103b165c46268b6c4ce16d82c79ad95"
 dependencies = [
  "ratatui",
  "serde",
@@ -2186,6 +2188,7 @@ dependencies = [
 [[package]]
 name = "xtop-wasm-contract"
 version = "0.1.0"
+source = "git+https://github.com/xtop-cli/plugins#1ed3ed4c1103b165c46268b6c4ce16d82c79ad95"
 dependencies = [
  "serde",
 ]
@@ -2319,6 +2322,7 @@ dependencies = [
 [[package]]
 name = "xtop-widget-replay"
 version = "0.1.0"
+source = "git+https://github.com/xtop-cli/plugins#1ed3ed4c1103b165c46268b6c4ce16d82c79ad95"
 dependencies = [
  "ratatui",
  "xtop-plugin-api",

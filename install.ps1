@@ -1,5 +1,15 @@
 # xtop installer for Windows
 # Installs xtop by building from source (requires Rust/Cargo)
+#
+# Usage:
+#   .\install.ps1                     # default build
+#   .\install.ps1 -RuntimeWidgets     # also enable plugin-wasm + plugin-external
+#                                     # (sandboxed .wasm widgets and helper
+#                                     # processes in any language)
+
+param(
+    [switch]$RuntimeWidgets
+)
 
 $ErrorActionPreference = "Stop"
 
@@ -42,7 +52,11 @@ if (Test-Path "Cargo.toml") {
 Set-Location "$TempDir\$AppName"
 
 Write-Host "Building $AppName..." -ForegroundColor Cyan
-cargo build --release
+$FeatureArgs = @()
+if ($RuntimeWidgets) {
+    $FeatureArgs = @("--features", "plugin-wasm,plugin-external")
+}
+cargo build --release @FeatureArgs
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Build failed." -ForegroundColor Red

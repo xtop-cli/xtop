@@ -39,11 +39,10 @@ xtop-effect-fade = { git = "https://github.com/xtop-cli/effects", optional = tru
 # Runtime widget hosts (xtop-cli/plugins): additive, opt-in features that open
 # the widget surface to code not compiled into the kernel — sandboxed WASM
 # modules (`plugin-wasm`) and helper processes in any language
-# (`plugin-external`). Local path dependencies during active development of
-# the hosts; they become git dependencies once the crates are pushed (same
-# temporary path-dep pattern the ecosystem docs describe).
-xtop-plugin-wasm = { path = "../plugins/plugins/xtop-plugin-wasm", optional = true }
-xtop-plugin-external = { path = "../plugins/plugins/xtop-plugin-external", optional = true }
+# (`plugin-external`). Consumed as git dependencies like the rest of the
+# ecosystem, so a clean clone builds without sibling checkouts.
+xtop-plugin-wasm = { git = "https://github.com/xtop-cli/plugins", optional = true }
+xtop-plugin-external = { git = "https://github.com/xtop-cli/plugins", optional = true }
 
 [features]
 default = ["plugin-samurai", "mcp-extension"]

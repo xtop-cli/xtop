@@ -65,8 +65,16 @@ blocks widget pack, the effects module and the two runtime widget hosts
 # Install only dependencies (Rust, build tools)
 ./install.sh --install-deps
 
+# Install with the runtime widget hosts enabled (sandboxed .wasm widgets
+# and helper processes in any language)
+./install.sh --with-runtime-widgets
+
 # Show help
 ./install.sh --help</code></pre>
+
+<p>On Windows the same opt-in is a switch on the installer:</p>
+
+<pre><code>.\install.ps1 -RuntimeWidgets</code></pre>
 
 <h3>Supported Distributions</h3>
 

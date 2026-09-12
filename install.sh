@@ -9,6 +9,7 @@ APP_NAME="xtop"
 REPO_URL="https://github.com/xtop-cli/xtop.git"
 INSTALL_DIR="/usr/local/bin"
 VERSION="0.1.0"
+BUILD_FEATURES="" # set by --with-runtime-widgets
 
 # Colors
 GREEN='\033[0;32m'
@@ -280,7 +281,7 @@ do_install() {
     log_info "Building $APP_NAME (this may take a moment)..."
     cd "$source_dir"
     
-    if ! cargo build --release; then
+    if ! cargo build --release $BUILD_FEATURES; then
         log_error "Build failed"
         [ "$cleanup_temp" = true ] && rm -rf "$TEMP_DIR"
         exit 1
@@ -345,6 +346,9 @@ show_help() {
     echo "  --help, -h        Show this help message"
     echo "  --check-deps      Check if all dependencies are installed"
     echo "  --install-deps    Install all required dependencies"
+    echo "  --with-runtime-widgets  Build with the runtime widget hosts"
+    echo "                    (plugin-wasm + plugin-external: sandboxed .wasm"
+    echo "                    widgets and helper processes in any language)"
     echo "  --uninstall       Uninstall $APP_NAME"
     echo "  --version, -v     Show installer version"
     echo ""
@@ -376,6 +380,10 @@ main() {
             ;;
         --install-deps)
             install_all_deps
+            ;;
+        --with-runtime-widgets)
+            BUILD_FEATURES="--features plugin-wasm,plugin-external"
+            do_install
             ;;
         --uninstall)
             do_uninstall
