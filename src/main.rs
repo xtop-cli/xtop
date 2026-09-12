@@ -29,6 +29,9 @@ fn print_usage() {
     eprintln!("  xtop widget scaffold <name> Create a new single-widget pack crate");
     eprintln!("  xtop layout check <file>    Validate a layout JSONC file");
     eprintln!("  xtop layout install <name>  Install a layout from github.com/xtop-cli/layouts");
+    eprintln!(
+        "  xtop --ct <theme>           Change the active theme (persists; live instances follow)"
+    );
 }
 
 fn main() -> anyhow::Result<()> {
@@ -49,6 +52,14 @@ fn main() -> anyhow::Result<()> {
             }
             "layout" => {
                 return commands::layout::layout_command(&args);
+            }
+            "--ct" => {
+                ensure_default_assets();
+                let Some(name) = args.get(2) else {
+                    eprintln!("Usage: xtop --ct <theme>");
+                    std::process::exit(2);
+                };
+                return commands::theme::cmd_change_theme(name);
             }
             "--help" | "-h" => {
                 print_usage();

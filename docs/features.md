@@ -108,6 +108,16 @@
 
 <hr>
 
+<h2 id="extensibility">Extensibility</h2>
+
+<ul>
+  <li>Plugins, widget packs, extensions and effects are compile-time (Cargo features + git dependencies); a plain build needs none of them.</li>
+  <li>Runtime widgets (opt-in <code>plugin-wasm</code> and <code>plugin-external</code> features) load widgets that are not compiled into the kernel: sandboxed <code>.wasm</code> modules (wasmi, fuel and memory limits) or one helper process per widget in any language over line-delimited JSON. They register through the plugin path, keep precedence over packs, and are referenced in layouts by name — see <a href="customization.md#runtime-widgets">customization.md</a>.</li>
+  <li>External themers can switch the active theme with <code>xtop --ct &lt;theme&gt;</code>; running instances follow the persisted change within one tick.</li>
+</ul>
+
+<hr>
+
 <p align="center">
   <a href="../README.md">Back to README</a>
 </p>

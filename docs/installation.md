@@ -50,7 +50,8 @@ Install with cargo (needs the Rust toolchain from rustup):</p>
 
 <p>The binary lands in <code>~/.cargo/bin</code>; make sure it is on your PATH.
 <code>--all-features</code> enables the Samurai plugin, the MCP extension, the
-blocks widget pack and the effects module.</p>
+blocks widget pack, the effects module and the two runtime widget hosts
+(sandboxed WASM and external processes).</p>
 
 <hr>
 

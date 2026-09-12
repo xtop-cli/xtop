@@ -2,6 +2,8 @@
 
 use std::fs;
 use std::path::Path;
+#[cfg(any(feature = "plugin-wasm", feature = "plugin-external"))]
+use std::path::PathBuf;
 
 use crate::config;
 use crate::plugins::PluginManager;
@@ -21,6 +23,9 @@ pub(crate) fn build_plugin_manager(state: &mut AppState, cfg_dir: &Path) -> Plug
 
     // Register plugins behind feature flags.
     register_plugins(&mut mgr, state);
+    // Optional runtime widget hosts (external guests, not compiled in).
+    register_wasm_widgets(&mut mgr, state, cfg_dir);
+    register_external_widgets(&mut mgr, state, cfg_dir);
 
     mgr
 }
@@ -37,6 +42,55 @@ pub(crate) fn register_plugins(mgr: &mut PluginManager, state: &mut AppState) {
 /// No plugins selected at compile time.
 #[cfg(not(feature = "plugin-samurai"))]
 fn register_plugins(_mgr: &mut PluginManager, _state: &mut AppState) {}
+
+/// Widget directory under the config dir, overridable by an environment
+/// variable (used by both runtime widget hosts).
+#[cfg(any(feature = "plugin-wasm", feature = "plugin-external"))]
+fn runtime_widget_dir(cfg_dir: &Path, env: &str, name: &str) -> PathBuf {
+    std::env::var_os(env)
+        .map(PathBuf::from)
+        .unwrap_or_else(|| cfg_dir.join(name))
+}
+
+/// Register WASM widgets discovered in the user config dir (`wasm/`).
+#[cfg(feature = "plugin-wasm")]
+pub(crate) fn register_wasm_widgets(mgr: &mut PluginManager, state: &mut AppState, cfg_dir: &Path) {
+    let dir = runtime_widget_dir(
+        cfg_dir,
+        xtop_plugin_wasm::DIR_ENV,
+        xtop_plugin_wasm::DIR_NAME,
+    );
+    for plugin in xtop_plugin_wasm::discover(&dir) {
+        if let Err(e) = mgr.register(plugin, state) {
+            eprintln!("[xtop] failed to register wasm widget: {e}");
+        }
+    }
+}
+
+#[cfg(not(feature = "plugin-wasm"))]
+fn register_wasm_widgets(_mgr: &mut PluginManager, _state: &mut AppState, _cfg_dir: &Path) {}
+
+/// Register helper-process widgets discovered in `external/`.
+#[cfg(feature = "plugin-external")]
+pub(crate) fn register_external_widgets(
+    mgr: &mut PluginManager,
+    state: &mut AppState,
+    cfg_dir: &Path,
+) {
+    let dir = runtime_widget_dir(
+        cfg_dir,
+        xtop_plugin_external::DIR_ENV,
+        xtop_plugin_external::DIR_NAME,
+    );
+    for plugin in xtop_plugin_external::discover(&dir) {
+        if let Err(e) = mgr.register(plugin, state) {
+            eprintln!("[xtop] failed to register external widget: {e}");
+        }
+    }
+}
+
+#[cfg(not(feature = "plugin-external"))]
+fn register_external_widgets(_mgr: &mut PluginManager, _state: &mut AppState, _cfg_dir: &Path) {}
 
 // ---------------------------------------------------------------------------
 // CLI subcommands

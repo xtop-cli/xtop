@@ -30,6 +30,7 @@
     </ul>
   </li>
   <li><a href="#widget-packs">Widget Packs</a></li>
+  <li><a href="#runtime-widgets">Runtime Widgets (WASM / External Processes)</a></li>
 </ul>
 
 <hr>
@@ -220,6 +221,16 @@ copying anything.</p>
 <code>tokio</code>.</p>
 
 <p>All theme palettes are documented in <a href="colors.md"><code>colors.md</code></a>.</p>
+
+<h3 id="switching-themes-from-the-cli">Switching Themes from the CLI</h3>
+
+<p><code>xtop --ct &lt;name&gt;</code> changes the active theme and persists it
+to <code>config.json</code>, so the next start uses it. A running instance
+follows the change live within one tick because the TUI run loop polls the
+persisted theme — no restart and no IPC needed. This is the hook for
+external themers: e.g. a Hyprland theme switcher script can run
+<code>xtop --ct tokio</code> alongside its own theme changes. Unknown names
+fail with the list of available themes.</p>
 
 <h3 id="loading-order">Loading Order</h3>
 
@@ -570,6 +581,56 @@ widgets) or <code>style.widgets.&lt;name&gt;.pack</code> (one widget), then
 place its widget names in a layout file. Authoring guidance (the pack
 contract, how packs register renderers, the renderers' options) lives in the
 widgets repo docs (<code>docs/authoring.md</code>, <code>docs/widgets.md</code>).</p>
+
+<hr>
+
+<h2 id="runtime-widgets">Runtime Widgets (WASM / External Processes)</h2>
+
+<p>Besides compiled-in packs, xtop can host <strong>runtime widgets</strong>:
+code that is not compiled into the kernel and is loaded from the user config
+directory at startup. Two optional hosts exist, both off by default:</p>
+
+<table>
+  <thead>
+    <tr><th>Feature</th><th>Source</th><th>Directory</th><th>Isolation</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>plugin-wasm</code></td>
+      <td><code>.wasm</code> modules loaded with wasmi</td>
+      <td><code>wasm/</code> (override <code>XTOP_WASM_DIR</code>)</td>
+      <td>In-process sandbox: fuel budget per call, 64&nbsp;MiB memory cap, no host imports except <code>host.log</code></td>
+    </tr>
+    <tr>
+      <td><code>plugin-external</code></td>
+      <td>One helper process per widget (Lua, Python, Node, any language)</td>
+      <td><code>external/</code> (override <code>XTOP_EXTERNAL_DIR</code>)</td>
+      <td>The process boundary itself (user permissions); every response is bounded by <code>timeout_ms</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Build with the hosts enabled:</p>
+
+<pre><code>cargo build --release --features plugin-wasm,plugin-external</code></pre>
+
+<p>Runtime widgets register through the plugin widget path, so they keep
+precedence over every pack and can replace any widget name. Layouts reference
+them by the <code>name</code> in the guest manifest (for example
+<code>wasm-clock</code>). A guest is called once per tick and its draw list
+is cached and replayed at render time, so a slow guest can never stall a
+frame; WASM modules hot-reload when their file changes and helper processes
+keep their last good frame when they time out or fail.</p>
+
+<p>Working examples ship in the plugins repo: Rust WASM guests under
+<code>examples/wasm/</code> (clock, CPU gauge + sparkline, process table) and
+Lua/Python/Node helper widgets under <code>examples/external/</code>. The
+full contracts — guest ABI, draw-list operations, state snapshot fields and
+the external descriptor format — live in <code>docs/wasm-widgets.md</code>
+and <code>docs/external-widgets.md</code> of that repo. The workspace ships a
+self-contained demo that builds and installs everything into
+<code>temp/xtop-demo/</code> and launches xtop against it:
+<code>./temp/xtop-demo/run-demo.sh</code>.</p>
 
 <hr>
 
