@@ -157,8 +157,12 @@ legibility) into one cumulative list.
   the manifest `name`.
 - Hosts and shared crates live in `xtop-cli/plugins` (`xtop-plugin-wasm`,
   `xtop-plugin-external`, `xtop-wasm-contract`, `xtop-widget-replay`,
-  `xtop-wasm-guest`); until that repo is pushed, the kernel consumes them as
-  local path deps (revert to git deps before push).
+  `xtop-wasm-guest`) and are consumed as git dependencies, so a clean clone
+  builds without sibling checkouts.
+- Installers can enable the hosts: `install.sh --with-runtime-widgets` and
+  `install.ps1 -RuntimeWidgets` pass `--features
+  plugin-wasm,plugin-external` to the build; the default install stays
+  unchanged.
 - `--all-features` now also enables the runtime hosts (wasmi plus process
   spawning); `docs/installation.md` states this.
 - Docs: `docs/customization.md` and `docs/plugin.md` gained a "Runtime
