@@ -8,6 +8,7 @@ pub mod mcp;
 pub mod plugins;
 pub mod run;
 pub(crate) mod share;
+pub mod theme;
 pub mod widget;
 
 pub(crate) use share::*;

@@ -202,6 +202,7 @@ action and <kbd>Esc</kbd> to close.</p>
   </thead>
   <tbody>
     <tr><td><code>xtop mcp</code></td><td>Start the MCP server (stdio transport) for AI agents</td></tr>
+    <tr><td><code>xtop --ct &lt;theme&gt;</code></td><td>Change the active theme (persists; running instances follow within one tick)</td></tr>
     <tr><td><code>xtop plugin list</code></td><td>List plugins wired into the kernel <code>Cargo.toml</code></td></tr>
     <tr><td><code>xtop plugin install &lt;name|url&gt;</code></td><td>Install a plugin (self-edits the kernel manifest)</td></tr>
     <tr><td><code>xtop plugin scaffold &lt;name&gt;</code></td><td>Create a plugin crate template in <code>plugins-dev/</code></td></tr>
@@ -219,7 +220,12 @@ and feature flags in the kernel's sources; enable a feature in the
 <code>--features &lt;name&gt;</code>) and rebuild to include it. Widget-pack
 details live in <a href="customization.md#widget-packs">customization.md
 (&ldquo;Widget Packs&rdquo;)</a>, plugin details in
-<a href="plugin.md">plugin.md</a>.</p>
+<a href="plugin.md">plugin.md</a>. Widgets can also be provided at runtime,
+without recompiling the kernel: build with
+<code>--features plugin-wasm,plugin-external</code> and drop <code>.wasm</code>
+modules or helper-process descriptors into the config dir — see
+<a href="customization.md#runtime-widgets">customization.md
+(&ldquo;Runtime Widgets&rdquo;)</a>.</p>
 
 <hr>
 

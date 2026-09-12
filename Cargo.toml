@@ -36,12 +36,25 @@ xtop-extension-mcp = { git = "https://github.com/xtop-cli/extensions", optional 
 xtop-plugin-samurai = { git = "https://github.com/xtop-cli/plugins", optional = true }
 xtop-effect-fade = { git = "https://github.com/xtop-cli/effects", optional = true }
 
+# Runtime widget hosts (xtop-cli/plugins): additive, opt-in features that open
+# the widget surface to code not compiled into the kernel — sandboxed WASM
+# modules (`plugin-wasm`) and helper processes in any language
+# (`plugin-external`). Local path dependencies during active development of
+# the hosts; they become git dependencies once the crates are pushed (same
+# temporary path-dep pattern the ecosystem docs describe).
+xtop-plugin-wasm = { path = "../plugins/plugins/xtop-plugin-wasm", optional = true }
+xtop-plugin-external = { path = "../plugins/plugins/xtop-plugin-external", optional = true }
+
 [features]
 default = ["plugin-samurai", "mcp-extension"]
 plugin-samurai = ["dep:xtop-plugin-samurai"]
 mcp-extension = ["dep:xtop-extension-mcp"]
 widget-blocks = ["dep:xtop-widget-blocks"]
 effects = ["dep:xtop-effect-fade", "dep:xtop-effect-api"]
+# Runtime widget hosts: not in the default set on purpose (the compiled-in
+# widget system needs no extra runtime and no extra dependencies).
+plugin-wasm = ["dep:xtop-plugin-wasm"]
+plugin-external = ["dep:xtop-plugin-external"]
 
 [target.'cfg(windows)'.dependencies]
 # Windows probes under src/providers/sysinfo/platform/windows.rs (thin FFI,

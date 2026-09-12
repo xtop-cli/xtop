@@ -50,6 +50,8 @@
   <li>Full-screen mode for any widget</li>
   <li>Configurable alert thresholds</li>
   <li>Persistent configuration</li>
+  <li>Runtime widgets: sandboxed WASM modules or helper processes (Lua, Python, ...) via the opt-in <code>plugin-wasm</code> / <code>plugin-external</code> features</li>
+  <li>Theme switching from the CLI (<code>xtop --ct &lt;theme&gt;</code>), followed live by running instances</li>
 </ul>
 
 <p>See <a href="docs/features.md">docs/features.md</a> for a detailed feature breakdown.</p>

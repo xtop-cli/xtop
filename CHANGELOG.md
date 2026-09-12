@@ -146,6 +146,34 @@ legibility) into one cumulative list.
 - Crate version pinned to `0.1.0` (installer `VERSION` synced) per the
   ecosystem version policy: stay early, no more bumps.
 
+### Runtime widget hosts (opt-in)
+- New optional features `plugin-wasm` (sandboxed `.wasm` widgets via wasmi)
+  and `plugin-external` (one helper process per widget over line-delimited
+  JSON); both are non-default and absent from the `default` set, so the
+  compiled-in plugin/pack system and a plain build are unchanged. Runtime
+  widgets register through the plugin widget path (precedence over every
+  pack), are discovered in `<config dir>/wasm/` and `<config dir>/external/`
+  (`XTOP_WASM_DIR` / `XTOP_EXTERNAL_DIR`) and are referenced in layouts by
+  the manifest `name`.
+- Hosts and shared crates live in `xtop-cli/plugins` (`xtop-plugin-wasm`,
+  `xtop-plugin-external`, `xtop-wasm-contract`, `xtop-widget-replay`,
+  `xtop-wasm-guest`); until that repo is pushed, the kernel consumes them as
+  local path deps (revert to git deps before push).
+- `--all-features` now also enables the runtime hosts (wasmi plus process
+  spawning); `docs/installation.md` states this.
+- Docs: `docs/customization.md` and `docs/plugin.md` gained a "Runtime
+  Widgets" section; `docs/multi-repo.md` integration modes updated. The
+  rationale is recorded as ADR-001 in the plugins repo
+  (`plugins/docs/decisions.md`).
+
+### Theme switching from the CLI
+- `xtop --ct <theme>` changes the active theme from the command line and
+  persists it to `config.json`; a running instance follows the change live
+  (the TUI run loop polls the persisted theme at tick boundaries), so
+  external themers such as a Hyprland theme switcher can drive it without
+  IPC. Unknown names fail with the list of available themes
+  (`src/commands/theme.rs`, `docs/usage.md`, `docs/customization.md`).
+
 ## Earlier history
 
 ### [0.0.1] - 2026-06-18

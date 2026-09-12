@@ -11,6 +11,7 @@ use crossterm::event::{
 };
 
 use super::share::{initialize_state, save_config};
+use super::theme::persisted_theme;
 
 fn key_event_to_str(key: &KeyEvent) -> String {
     let mut s = String::new();
@@ -118,6 +119,7 @@ pub fn run() -> anyhow::Result<()> {
 
         if last_tick.elapsed() >= tick_rate {
             state.on_tick();
+            sync_external_theme(&mut state);
             last_tick = Instant::now();
         }
 
@@ -133,6 +135,19 @@ pub fn run() -> anyhow::Result<()> {
 
     ui::restore()?;
     Ok(())
+}
+
+/// Apply a theme changed by another process (`xtop --ct <name>`).
+///
+/// The CLI persists the choice in `config.json`; polling the file at tick
+/// boundaries gives live sync from another terminal without IPC. A missing or
+/// invalid config file is ignored so a partial write never resets the theme.
+fn sync_external_theme(state: &mut crate::state::AppState) {
+    if let Some(name) = persisted_theme() {
+        if name != state.current_theme.name {
+            state.set_theme_by_name(&name);
+        }
+    }
 }
 
 fn handle_key(state: &mut crate::state::AppState, key: KeyEvent) {
