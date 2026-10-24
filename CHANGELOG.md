@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+Security-hardening pass (release/v0.1.0 branch):
+
+- Hardened `plugin install` / `widget install`: URL and crate-name validation,
+  `--` before git URLs, TOML escaping, and source-name checks.
+- Bounded Windows process/thread FFI reads to the kernel-provided buffer.
+- `roadmap-sync` now opens a PR instead of pushing directly to `main`.
+
 ## [0.1.0] - 2026-09-04
 
 Version policy note: the ecosystem stays early — everything is 0.1.0. The

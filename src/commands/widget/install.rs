@@ -28,15 +28,15 @@ pub(crate) fn cmd_widget_install(name_or_url: &str) -> anyhow::Result<()> {
     // name in the xtop-cli/widgets repo).
     let source = Source::resolve(name_or_url)?;
     let pkg = source.package_name()?;
-    let Some(label) = pkg.strip_prefix("xtop-widget-") else {
+    if !is_valid_crate_name(&pkg, "xtop-widget-") {
         let _ = source.cleanup();
         anyhow::bail!(
             "package '{pkg}' is not a widget pack: expected a name starting with `xtop-widget-`"
         );
-    };
-    if label.is_empty() {
-        anyhow::bail!("invalid widget pack name '{pkg}'");
     }
+    let label = pkg
+        .strip_prefix("xtop-widget-")
+        .expect("validated widget package name");
     let feature = format!("widget-{label}");
     let crate_ident = pkg.replace('-', "_");
 
@@ -95,6 +95,9 @@ impl Source {
         }
         // Bare name: look the pack up in the widgets repo, like plugins.
         let name = input.trim_start_matches("xtop-widget-");
+        if !is_valid_crate_name(&format!("xtop-widget-{name}"), "xtop-widget-") {
+            anyhow::bail!("invalid widget pack name '{name}'");
+        }
         let tmp = std::env::temp_dir().join("xtop-widget-install");
         clone_into_tmp(WIDGETS_REPO, &tmp)?;
         let found = find_pack_crate(&tmp, name).is_ok();
@@ -153,10 +156,12 @@ fn edit_cargo_manifest(pkg: &str, source: &Source, feature: &str) -> anyhow::Res
     let content = fs::read_to_string(&manifest_path)?;
     let dep_line = match source {
         Source::Local(dir) => format!(
-            "{pkg} = {{ path = \"{}\", optional = true }}",
-            dir.display()
+            "{pkg} = {{ path = {}, optional = true }}",
+            toml_quote(&dir.display().to_string())
         ),
-        Source::Git { url, .. } => format!("{pkg} = {{ git = \"{url}\", optional = true }}"),
+        Source::Git { url, .. } => {
+            format!("{pkg} = {{ git = {}, optional = true }}", toml_quote(url))
+        }
     };
     let feature_line = format!("{feature} = [\"dep:{pkg}\"]");
     let mut new_content = content.clone();
@@ -240,7 +245,54 @@ fn edit_pack_table(label: &str, feature: &str, crate_ident: &str) -> anyhow::Res
 }
 
 fn is_git_url(s: &str) -> bool {
-    s.contains("://") || s.contains("github.com") || s.contains("git@")
+    if s.starts_with('-')
+        || s.chars()
+            .any(|c| c.is_control() || c.is_whitespace() || c == '"' || c == '\\')
+    {
+        return false;
+    }
+    if let Some(pos) = s.find("://") {
+        let scheme = &s[..pos];
+        let mut chars = scheme.chars();
+        let starts_ok = chars.next().is_some_and(|c| c.is_ascii_alphabetic());
+        let rest_ok = chars.all(|c| c.is_ascii_alphanumeric() || matches!(c, '+' | '-' | '.'));
+        return starts_ok && rest_ok;
+    }
+    s.starts_with("github.com/") || s.starts_with("git@")
+}
+
+/// Quote one string as a TOML basic string, escaping quotes, backslashes and
+/// control characters. Keeps git URLs and local paths from breaking out of
+/// the generated `Cargo.toml` entry.
+fn toml_quote(value: &str) -> String {
+    let mut out = String::with_capacity(value.len() + 2);
+    out.push('"');
+    for c in value.chars() {
+        match c {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            c if c.is_control() => out.push_str(&format!("\\u{:04X}", c as u32)),
+            c => out.push(c),
+        }
+    }
+    out.push('"');
+    out
+}
+
+/// Cargo package names are ASCII alphanumerics plus `-`/`_`. Validating the
+/// suffix keeps a hostile manifest from injecting TOML or Rust source.
+fn is_valid_crate_name(name: &str, prefix: &str) -> bool {
+    name.len() <= 64
+        && name.starts_with(prefix)
+        && name.strip_prefix(prefix).is_some_and(|rest| {
+            !rest.is_empty()
+                && rest
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+        })
 }
 
 fn is_local_path(s: &str) -> bool {
@@ -268,6 +320,7 @@ fn clone_into_tmp(repo_url: &str, tmp: &Path) -> anyhow::Result<()> {
             "1",
             "--filter=blob:none",
             "--sparse",
+            "--",
             repo_url,
             tmp.to_str().unwrap(),
         ])
@@ -284,6 +337,9 @@ fn clone_into_tmp(repo_url: &str, tmp: &Path) -> anyhow::Result<()> {
 /// `packs/<name>`, `xtop-widget-<name>` and `widgets/xtop-widget-<name>`.
 fn find_pack_crate(root: &Path, name: &str) -> anyhow::Result<(PathBuf, String)> {
     let named = format!("xtop-widget-{name}");
+    if !name.is_empty() && !is_valid_crate_name(&named, "xtop-widget-") {
+        anyhow::bail!("invalid widget pack name '{name}'");
+    }
     let candidates = [
         root.join("packs").join(&named),
         root.join(&named),
@@ -303,7 +359,7 @@ fn find_pack_crate(root: &Path, name: &str) -> anyhow::Result<(PathBuf, String)>
                 .and_then(|p| p.get("name"))
                 .and_then(|n| n.as_str())
             {
-                if pkg_name.starts_with("xtop-widget-") {
+                if is_valid_crate_name(pkg_name, "xtop-widget-") {
                     println!("Found widget pack at {}", cand.display());
                     return Ok((cand.to_path_buf(), pkg_name.to_string()));
                 }
@@ -386,10 +442,28 @@ mod tests {
     fn url_and_path_detection() {
         assert!(is_git_url("https://github.com/xtop-cli/widgets"));
         assert!(is_git_url("git@github.com:me/xtop-widget-x.git"));
+        assert!(is_git_url("github.com/xtop-cli/widgets"));
+        assert!(!is_git_url("--upload-pack=evil"));
+        assert!(!is_git_url("https://github.com/x y"));
+        assert!(!is_git_url("https://github.com/x\"y"));
         assert!(is_local_path("/home/me/widgets"));
         assert!(is_local_path("./widgets-dev/xtop-widget-x"));
         assert!(is_local_path("~/code/xtop-widget-x"));
         assert!(!is_local_path("github.com/xtop-cli/widgets"));
+    }
+
+    #[test]
+    fn crate_names_and_toml_quoting_are_safe() {
+        assert!(is_valid_crate_name("xtop-widget-demo", "xtop-widget-"));
+        assert!(is_valid_crate_name("xtop-widget-disk_io", "xtop-widget-"));
+        assert!(!is_valid_crate_name("xtop-widget-", "xtop-widget-"));
+        assert!(!is_valid_crate_name(
+            "xtop-widget-x\"; evil = true",
+            "xtop-widget-"
+        ));
+        assert_eq!(toml_quote("https://x/y"), "\"https://x/y\"");
+        assert_eq!(toml_quote("C:\\x\\y"), "\"C:\\\\x\\\\y\"");
+        assert_eq!(toml_quote("a\"b"), "\"a\\\"b\"");
     }
 
     /// A minimal pack_table.rs fixture with both markers present.

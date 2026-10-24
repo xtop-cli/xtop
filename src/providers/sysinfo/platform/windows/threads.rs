@@ -100,10 +100,16 @@ fn nt_snapshot_counts() -> Option<HashMap<u32, u64>> {
     }
 
     let pid_off = (*PID_OFFSET.get_or_init(|| calibrate_pid_offset(&buf)))?;
+    let entry_len = pid_off.checked_add(std::mem::size_of::<u64>())?;
     let mut counts: HashMap<u32, u64> = HashMap::new();
     let base = buf.as_ptr();
     let mut off = 0usize;
     loop {
+        // The buffer comes from the kernel, but never read past it if the
+        // reported `NextEntryOffset` chain is truncated or inconsistent.
+        if off.checked_add(entry_len)? > buf.len() {
+            return None;
+        }
         let entry = unsafe { base.add(off) };
         let next =
             unsafe { std::ptr::read_unaligned(entry.add(ENTRY_NEXT) as *const u32) } as usize;
@@ -116,7 +122,7 @@ fn nt_snapshot_counts() -> Option<HashMap<u32, u64>> {
         if next == 0 {
             break;
         }
-        off += next;
+        off = off.checked_add(next)?;
     }
     Some(counts)
 }
@@ -137,11 +143,23 @@ fn calibrate_pid_offset(buf: &[u8]) -> Option<usize> {
         return None;
     }
     for &candidate in PID_OFFSET_CANDIDATES {
+        let Some(entry_len) = candidate.checked_add(std::mem::size_of::<u64>()) else {
+            continue;
+        };
         let mut off = 0usize;
         let mut first_two = [0u32; 2];
         let mut seen = 0usize;
+        let mut valid = true;
         loop {
-            let entry = buf.as_ptr().wrapping_add(off);
+            let Some(end) = off.checked_add(entry_len) else {
+                valid = false;
+                break;
+            };
+            if end > buf.len() {
+                valid = false;
+                break;
+            }
+            let entry = unsafe { buf.as_ptr().add(off) };
             let next = unsafe { std::ptr::read_unaligned(entry as *const u32) } as usize;
             let pid =
                 unsafe { std::ptr::read_unaligned(entry.add(candidate) as *const u64) } as u32;
@@ -152,9 +170,13 @@ fn calibrate_pid_offset(buf: &[u8]) -> Option<usize> {
             if next == 0 {
                 break;
             }
-            off += next;
+            let Some(next_off) = off.checked_add(next) else {
+                valid = false;
+                break;
+            };
+            off = next_off;
         }
-        if first_two == [0, 4] && seen >= 2 {
+        if valid && first_two == [0, 4] && seen >= 2 {
             return Some(candidate);
         }
     }
