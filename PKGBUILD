@@ -1,7 +1,7 @@
 # Maintainer: xscriptor <x@xscriptor.com>
 pkgname=xtop-git
 _pkgname=xtop
-pkgver=r7.37fae84
+pkgver=r37.3d045c7
 pkgrel=1
 pkgdesc="A TUI system monitor written in Rust for X"
 arch=('x86_64')

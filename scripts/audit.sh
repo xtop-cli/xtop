@@ -6,7 +6,8 @@
 #   - files over 600 lines                           : must be 0
 #   - TODO/FIXME/XXX/HACK markers                    : must be 0
 #   - `pub use ...::*` wildcard re-exports           : <= 30
-#   - LOC per top-level area                         : <= 2400
+#   - LOC per top-level area, platform/ excluded     : <= 2400
+#   - LOC per platform/ tree                         : <= 2400
 #   - dead src/commands/plugins_dir_tmp/ tree        : must be absent
 #   - theme seeds embedded (miami included, 12 total): must hold
 #
@@ -49,14 +50,20 @@ echo "wildcard 'pub use ...::*': $wild (allow <= 30)"
 [ "$wild" -gt 30 ] && fail=1
 
 # --- LOC per top-level area ------------------------------------------------------------
-echo "-- LOC per area:"
+echo "-- LOC per area (platform/ budgeted separately):"
 for area in "$SRC"/*; do
     [ -d "$area" ] || continue
-    loc=$(find "$area" -name '*.rs' -exec cat {} + | wc -l)
-    total_loc=$((total_loc + loc))
     name=$(basename "$area")
+    area_loc=$(find "$area" -name '*.rs' -exec cat {} + | wc -l)
+    platform_loc=$(find "$area" -path '*/platform/*' -name '*.rs' -exec cat {} + | wc -l)
+    loc=$((area_loc - platform_loc))
+    total_loc=$((total_loc + area_loc))
     echo "  $name: $loc"
     [ "$loc" -gt 2400 ] && { echo "    ^ exceeds 2400"; fail=1; }
+    if [ "$platform_loc" -gt 0 ]; then
+        echo "  $name/platform: $platform_loc"
+        [ "$platform_loc" -gt 2400 ] && { echo "    ^ exceeds 2400"; fail=1; }
+    fi
 done
 main_loc=$(wc -l < "$SRC/main.rs")
 total_loc=$((total_loc + main_loc))

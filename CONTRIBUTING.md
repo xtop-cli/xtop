@@ -17,7 +17,8 @@ First off, thank you for considering contributing to `xtop`! It's people like yo
 2. Ensure you have installed the necessary dependencies (Rust & Cargo).
 3. Make your changes and test them locally using `cargo run`.
 4. Run `cargo fmt` and `cargo clippy` to ensure code quality and formatting.
-5. Create a pull request. Make sure the PR description clearly describes the problem and solution. Include the relevant issue number if applicable.
+5. Run the local gate: `./scripts/ci.sh && ./scripts/audit.sh`.
+6. Create a pull request. Make sure the PR description clearly describes the problem and solution. Include the relevant issue number if applicable.
 
 ## Development Setup
 

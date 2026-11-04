@@ -112,6 +112,14 @@ jobs:
       - name: Build
         run: cargo build --release --locked --all-features --target ${{ matrix.target }}
 
+      - name: Smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          BIN="target/${{ matrix.target }}/release/xtop"
+          [ "$RUNNER_OS" = "Windows" ] && BIN="${BIN}.exe"
+          "$BIN" --help > /dev/null 2>&1
+
       - name: Package
         shell: bash
         run: |
