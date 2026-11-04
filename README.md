@@ -111,22 +111,29 @@
 
 <h2 id="quick-install">Quick Install</h2>
 
-<h3>Linux</h3>
+<p>Prebuilt binaries are published for Linux (x86_64 glibc/musl and aarch64 glibc), macOS (x86_64 and aarch64) and Windows (x86_64). No Rust toolchain is required.</p>
+
+<h3>Linux / macOS (prebuilt)</h3>
+
+<pre><code>curl -fsSL https://raw.githubusercontent.com/xtop-cli/xtop/main/install-prebuilt.sh | bash</code></pre>
+
+<h3>Windows (prebuilt, PowerShell)</h3>
+
+<pre><code>irm https://raw.githubusercontent.com/xtop-cli/xtop/main/install-prebuilt.ps1 | iex</code></pre>
+
+<p>Pin a version with <code>--version 0.1.0</code> (or <code>-Version 0.1.0</code> on Windows). The installers verify the release <code>SHA256SUMS</code> and, when cosign is available, the keyless signature. See <a href="docs/installation.md">docs/installation.md</a> for prefixes and verification flags.</p>
+
+<h3>From source</h3>
+
+<h4>Linux</h4>
 
 <pre><code>curl -fsSL https://raw.githubusercontent.com/xtop-cli/xtop/main/install.sh | bash</code></pre>
 
-<h3>Windows (PowerShell)</h3>
+<h4>Windows (requires Rust)</h4>
 
 <pre><code>irm https://raw.githubusercontent.com/xtop-cli/xtop/main/install.ps1 | iex</code></pre>
 
-<h3>macOS and other platforms</h3>
-
-<p><code>install.sh</code> targets Linux package managers. On macOS (or any other
-platform) install with cargo:</p>
-
-<pre><code>cargo install --git https://github.com/xtop-cli/xtop --all-features</code></pre>
-
-<p>or build from source (see below).</p>
+<p>macOS from source: <code>cargo install --git https://github.com/xtop-cli/xtop --all-features</code>.</p>
 
 <h3>Build from Source</h3>
 
