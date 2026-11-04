@@ -13,6 +13,7 @@ on:
 permissions:
   issues: write
   contents: write
+  pull-requests: write
 
 jobs:
   sync:
@@ -30,7 +31,33 @@ jobs:
         with:
           python-version: '3.12'
 
+      # Work on a dedicated branch so `main` stays PR-only. The script commits
+      # and pushes ROADMAP.md; `push.default=current` sends it to this branch.
+      - name: Create sync branch
+        run: |
+          git checkout -b roadmap-sync/auto
+          git config push.default current
+
       - name: Sync roadmap with GitHub Issues
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python .github/scripts/sync_roadmap.py --roadmap ROADMAP.md
+
+      - name: Open pull request if ROADMAP.md changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --quiet origin/main -- ROADMAP.md; then
+            echo "ROADMAP.md is already in sync; nothing to open."
+            exit 0
+          fi
+          git push --force -u origin HEAD
+          if [ -z "$(gh pr list --head roadmap-sync/auto --state open --json number --jq '.[0].number')" ]; then
+            gh pr create \
+              --base main \
+              --head roadmap-sync/auto \
+              --title "docs: sync ROADMAP.md with issues [roadmap-sync]" \
+              --body "Automated roadmap sync. Review the issue numbers added to ROADMAP.md."
+          else
+            echo "An open roadmap-sync pull request already exists; pushed the update."
+          fi
