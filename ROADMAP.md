@@ -28,7 +28,7 @@ It is synced automatically with GitHub Issues.
 - [x] Automated install/uninstall scripts for Linux and macOS (`install.sh`, `uninstall.sh`) (#13)
 - [x] Automated install/uninstall scripts for Windows (`install.ps1`, `uninstall.ps1`) (#14)
 - [x] Quick curl/wget installation commands (#15)
-- [ ] CI/CD pipeline for automated multi-platform binary releases (#16)
+- [x] CI/CD pipeline for automated multi-platform binary releases (#16)
 - [ ] Distribution packages (AUR, Homebrew, Winget, APT) (#17)
 
 ## Phase 4: Configuration & Customization <!-- phase:config -->
