@@ -11,9 +11,9 @@
 | Repo (xtop-cli) | Role | Content |
 |---|---|---|
 | `api` | **Contracts** | workspace with the four contract crates: `xtop-plugin-api` (data model, plugin/host traits, `AlertThresholds`, `PluginWidget`), `xtop-widget-api` (pack registration + glyph helpers), `xtop-extension-api` (extension host), `xtop-effect-api` (frame effects) |
-| `xtop` | **Kernel** | the app: single-crate binary, `src/` by areas (commands, config, plugins, providers, state, theme, ui). Consumes every other repo |
+| `xtop` | **Kernel** | the app: one library plus one binary, `src/` split into `core` (config, providers, state, theme, plugins), `cli` (dispatch and commands) and `tui` (rendering, input, platform terminal backends). Consumes every other repo |
 | `widgets` | **Renderers** | packs of widget renderers against `xtop-widget-api`: base pack `xtop-widgets` + alternative pack `xtop-widget-blocks` (sibling crate of the per-widget crates so git consumers resolve its `xtop-widget-core` dependency) + `custom/` community |
-| `layouts` | **Arrangement** | `xtop-layout` crate: data-driven layout model + JSONC loader + layout modes, plus `layouts/default/` (7 mode-bound layouts + 3 `detail_*` preset extras) and `layouts/custom/` (community, installable) |
+| `layouts` | **Arrangement** | `xtop-layout` crate: data-driven layout model + JSONC loader + layout modes, plus `layouts/default/` (10 JSONC files; only Dashboard is embedded) and `layouts/custom/` (community catalog assets) |
 | `plugins` | **Functionality** | plugin implementations against `xtop-plugin-api` (`xtop-plugin-samurai`), the runtime widget hosts (`xtop-plugin-wasm`, `xtop-plugin-external`) and their shared crates (`xtop-wasm-contract`, `xtop-widget-replay`, `xtop-wasm-guest`) |
 | `extensions` | **Kernel hooks** | server-style extensions against `xtop-extension-api` (`xtop-extension-mcp`) |
 | `effects` | **Animation** | frame effects against `xtop-effect-api` (`xtop-effect-fade`: 500 ms fade-in from black) |
@@ -86,7 +86,9 @@ floating git deps shown above.
 ## Why the split exists
 
 The kernel was originally a workspace of kernel-owned crates
-(`xtop-core`/`xtop-tui`/`xtop-cli`), then a monocrate with plugins inside.
+(`xtop-core`/`xtop-tui`/`xtop-cli`), then a monocrate with plugins inside;
+its current single-package layout keeps the same separation as module
+layers (`core`/`cli`/`tui`) without splitting the Cargo package.
 Each customization axis grew into its own repo so that:
 
 - a contributor can ship a widget pack, layout, plugin, extension or effect

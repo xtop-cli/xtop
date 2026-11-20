@@ -18,8 +18,8 @@ It is synced automatically with GitHub Issues.
 
 - [x] Dynamic layout manager supporting multiple modes (Dashboard, Vertical, Process Focus) (#9)
 - [x] Implement 13 built-in color schemes (`x`, `madrid`, `tokio`, etc.) (#10)
-      (12 theme files ship today, all embedded and seeded; the docs count
-      12. See docs/colors.md for the palette reference.)
+      (12 theme files ship today; only the base x theme is embedded, the
+      rest are catalog assets. See docs/colors.md for the palette reference.)
 - [x] Instant theme and layout cycling at runtime (#11)
 - [x] Responsive design for narrow terminals (#12)
 
@@ -74,26 +74,27 @@ It is synced automatically with GitHub Issues.
 
 ## Phase 8: Kernel Refactor <!-- phase:refactor -->
 
-Baseline done: single-crate kernel (src/ by areas: config, theme, layout,
-state, plugins, providers, ui, commands); plugin and extension hosts over
-the api contracts; samurai and the mcp extension live in their own repos.
+Baseline done: single package (library + binary) with layered `core`,
+`cli` and `tui` areas; plugin and extension hosts over the api contracts;
+samurai and the mcp extension live in their own repos.
 Only pending refactor work is listed here (git logistics are handled
 outside this roadmap).
 
 ### R2 - Code quality pass
 
-- [x] Module doc comments audit across src/ (#40) — the seven top-level (#45)
-      modules declared in src/main.rs (commands, config, plugins, providers,
-      state, theme, ui) all carry concise `//!` docs describing their area.
+- [x] Module doc comments audit across src/ (#40) — the top-level (#45)
+      `cli`, `core` and `tui` areas declared in src/lib.rs, and their
+      modules, all carry concise `//!` docs describing their area.
 - [x] cfg(target_os) only inside platform/ trees (#41) — enforced by (#46)
       scripts/audit.sh (0 occurrences outside platform/).
 - [ ] Wildcard re-export and pub hygiene review (#42) — 22 wildcard (#47)
       `pub use ...::*` re-exports remain (audit.sh threshold: 30); review
       still open.
-- [x] Split commands/plugins.rs into list/install/scaffold modules (#43)
+- [x] Split src/cli/commands/plugins/ into list/install/scaffold modules (#43)
 - [x] key_event_to_str into a shared input module if reused elsewhere (#44) — (#48)
-      single use site (commands/run.rs), so no shared module is needed.
-- [x] ui/share/error.rs only when real UI error handling appears (no empty (#49)
+      moved with `handle_key` into tui/input.rs as part of the core/cli/tui
+      refactor.
+- [x] tui/error.rs only when real UI error handling appears (no empty (#49)
       modules) (#45) — intentionally not created; documented in the root
       ROADMAP deferred list.
 - [x] Widgets subdivide internally when they outgrow one module (#46) — (#50)
@@ -107,7 +108,7 @@ outside this roadmap).
       TODO/FIXME/XXX/HACK markers = 0, wildcard `pub use ...::*` <= 30,
       LOC per top-level area <= 2400, dead pre-monocrate plugin tree absent
       (its path lives only inside the audit script as the guard itself),
-      `miami` embedded in the theme seeds (12 themes total). Module
+      the single base theme seed (x) and the root catalog.json. Module
       dependency graph/cycles and unused-pub detection are NOT implemented
       by the script (see the deferred note below).
 

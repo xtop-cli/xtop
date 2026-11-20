@@ -33,17 +33,17 @@ discovery. The built-in plugin is <code>xtop-plugin-samurai</code>
     </tr>
     <tr>
       <td><code>PluginManager</code></td>
-      <td><code>src/plugins/manager.rs</code></td>
+      <td><code>src/core/plugins/manager.rs</code></td>
       <td>Registers, ticks and dispatches events to plugins</td>
     </tr>
     <tr>
       <td><code>HostState</code> impl</td>
-      <td><code>src/plugins/host.rs</code></td>
+      <td><code>src/core/plugins/host.rs</code></td>
       <td>Kernel-side view of the live state plugins may touch</td>
     </tr>
     <tr>
       <td><code>CompositeProvider</code></td>
-      <td><code>src/providers/composite.rs</code></td>
+      <td><code>src/core/providers/composite.rs</code></td>
       <td>Merges the kernel provider with plugin data providers</td>
     </tr>
   </tbody>
@@ -127,7 +127,7 @@ ctx.data_dir()                  // Host-provided plugin data dir</code></pre>
 <h2 id="data-providers">Data Providers</h2>
 
 <p>The kernel samples the system with its own provider
-(<code>SysinfoProvider</code> in <code>src/providers/sysinfo/</code>) and composes
+(<code>SysinfoProvider</code> in <code>src/core/providers/sysinfo/</code>) and composes
 plugin providers through <code>CompositeProvider</code>:</p>
 
 <ul>
@@ -224,7 +224,7 @@ to stderr.</p>
 it, add its feature to the <code>default</code> list in <code>[features]</code> in the
 kernel <code>Cargo.toml</code> (or build with <code>--features &lt;name&gt;</code>) and
 recompile. Every installed plugin also needs a registration line in
-<code>src/commands/share/bootstrap.rs</code> under its feature flag.</p>
+<code>src/core/bootstrap.rs</code> under its feature flag.</p>
 
 <pre><code># Build xtop with samurai plugin enabled (default already includes it)
 cargo build --release --features plugin-samurai
@@ -320,7 +320,7 @@ xtop-plugin-mything = { git = "https://github.com/you/xtop-plugin-mything", opti
 plugin-mything = ["dep:xtop-plugin-mything"]</code></pre>
   </li>
   <li>
-    <p>Register it behind the feature flag in <code>src/commands/share/bootstrap.rs</code>:</p>
+    <p>Register it behind the feature flag in <code>src/core/bootstrap.rs</code>:</p>
     <pre><code>#[cfg(feature = "plugin-mything")]
 use xtop_plugin_mything::MythingPlugin;
 

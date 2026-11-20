@@ -3,13 +3,16 @@
 #
 # Failing thresholds (exit 1 when violated):
 #   - cfg(target_os) outside platform/ trees        : must be 0
-#   - files over 600 lines                           : must be 0
-#   - TODO/FIXME/XXX/HACK markers                    : must be 0
-#   - `pub use ...::*` wildcard re-exports           : <= 30
-#   - LOC per top-level area, platform/ excluded     : <= 2400
-#   - LOC per platform/ tree                         : <= 2400
-#   - dead src/commands/plugins_dir_tmp/ tree        : must be absent
-#   - theme seeds embedded (miami included, 12 total): must hold
+#   - files over 600 lines                          : must be 0
+#   - TODO/FIXME/XXX/HACK markers                   : must be 0
+#   - `pub use ...::*` wildcard re-exports          : <= 30
+#   - LOC per area/sub-area, platform/ excluded     : <= 2400
+#   - LOC per platform/ tree                        : <= 2400
+#   - core -> cli/tui references                    : must be 0
+#   - tui -> cli references                         : must be 0
+#   - cli -> tui references outside commands/tui.rs : must be 0
+#   - dead src/cli/commands/plugins_dir_tmp/ tree   : must be absent
+#   - base theme seed only (x) and catalog present  : must hold
 #
 # Non-failing metrics are printed for tracking (LOC, module count).
 # Not implemented (deferred): module dependency graph/cycles, unused-pub
@@ -28,6 +31,19 @@ bad_cfg=$(grep -rn "cfg(target_os" "$SRC" | grep -v "/platform/" | wc -l)
 echo "cfg(target_os) outside platform/ trees: $bad_cfg (must be 0)"
 [ "$bad_cfg" -ne 0 ] && fail=1
 
+# --- frontend layering ------------------------------------------------------------
+core_leaks=$(grep -rnE 'crate::(cli|tui)::' "$SRC/core" | wc -l)
+echo "core -> cli/tui references: $core_leaks (must be 0)"
+[ "$core_leaks" -ne 0 ] && fail=1
+
+tui_leaks=$(grep -rn 'crate::cli::' "$SRC/tui" | wc -l)
+echo "tui -> cli references: $tui_leaks (must be 0)"
+[ "$tui_leaks" -ne 0 ] && fail=1
+
+cli_tui_leaks=$(grep -rn 'crate::tui::' "$SRC/cli" | grep -v 'src/cli/commands/tui.rs' | wc -l)
+echo "cli -> tui references outside commands/tui.rs: $cli_tui_leaks (must be 0)"
+[ "$cli_tui_leaks" -ne 0 ] && fail=1
+
 # --- oversized files --------------------------------------------------------------
 echo "-- files > 300 lines (watch) and > 600 (fail):"
 big600=$(find "$SRC" -name '*.rs' -exec wc -l {} + | awk '$1 > 600 && $2 != "total" {print $2": "$1" lines"}')
@@ -37,7 +53,7 @@ if [ -n "$big600" ]; then
     echo "  ^ files over 600 lines"
     fail=1
 fi
-[ -n "$big300" ] && echo "$big300" || echo "  none > 300" 
+[ -n "$big300" ] && echo "$big300" || echo "  none > 300"
 
 # --- TODO/FIXME markers -------------------------------------------------------------
 todos=$(grep -rn "TODO\|FIXME\|XXX\|HACK" "$SRC" | wc -l)
@@ -49,41 +65,71 @@ wild=$(grep -rn "pub use .*::\*" "$SRC" | wc -l)
 echo "wildcard 'pub use ...::*': $wild (allow <= 30)"
 [ "$wild" -gt 30 ] && fail=1
 
-# --- LOC per top-level area ------------------------------------------------------------
+# --- LOC budgets --------------------------------------------------------------------
+check_budget() {
+    local label="$1" dir="$2"
+    local area_loc platform_loc loc
+    area_loc=$(find "$dir" -name '*.rs' -exec cat {} + 2>/dev/null | wc -l)
+    platform_loc=$(find "$dir" -path '*/platform/*' -name '*.rs' -exec cat {} + 2>/dev/null | wc -l)
+    loc=$((area_loc - platform_loc))
+    total_loc=$((total_loc + area_loc))
+    echo "  $label: $loc"
+    [ "$loc" -gt 2400 ] && { echo "    ^ exceeds 2400"; fail=1; }
+    if [ "$platform_loc" -gt 0 ]; then
+        echo "  $label/platform: $platform_loc"
+        [ "$platform_loc" -gt 2400 ] && { echo "    ^ exceeds 2400"; fail=1; }
+    fi
+}
+
 echo "-- LOC per area (platform/ budgeted separately):"
 for area in "$SRC"/*; do
     [ -d "$area" ] || continue
     name=$(basename "$area")
-    area_loc=$(find "$area" -name '*.rs' -exec cat {} + | wc -l)
-    platform_loc=$(find "$area" -path '*/platform/*' -name '*.rs' -exec cat {} + | wc -l)
-    loc=$((area_loc - platform_loc))
-    total_loc=$((total_loc + area_loc))
-    echo "  $name: $loc"
-    [ "$loc" -gt 2400 ] && { echo "    ^ exceeds 2400"; fail=1; }
-    if [ "$platform_loc" -gt 0 ]; then
-        echo "  $name/platform: $platform_loc"
-        [ "$platform_loc" -gt 2400 ] && { echo "    ^ exceeds 2400"; fail=1; }
+    if [ "$name" = "core" ] || [ "$name" = "cli" ]; then
+        group_root=$(find "$area" -maxdepth 1 -name '*.rs' -exec cat {} + 2>/dev/null | wc -l)
+        total_loc=$((total_loc + group_root))
+        echo "  $name(root): $group_root"
+        [ "$group_root" -gt 2400 ] && { echo "    ^ exceeds 2400"; fail=1; }
+        for sub in "$area"/*/; do
+            [ -d "$sub" ] || continue
+            check_budget "$name/$(basename "$sub")" "$sub"
+        done
+    else
+        check_budget "$name" "$area"
     fi
 done
+
 main_loc=$(wc -l < "$SRC/main.rs")
-total_loc=$((total_loc + main_loc))
-echo "main.rs: $main_loc / total kernel: $total_loc"
+lib_loc=$(wc -l < "$SRC/lib.rs")
+total_loc=$((total_loc + main_loc + lib_loc))
+echo "main.rs: $main_loc  lib.rs: $lib_loc  / total kernel: $total_loc"
 
 # --- dead pre-monocrate leftover tree -------------------------------------------------
-if [ -d "$SRC/commands/plugins_dir_tmp" ]; then
-    echo "dead src/commands/plugins_dir_tmp/ tree still present (must be absent)"
+if [ -d "$SRC/cli/commands/plugins_dir_tmp" ]; then
+    echo "dead src/cli/commands/plugins_dir_tmp/ tree still present (must be absent)"
     fail=1
 else
-    echo "dead src/commands/plugins_dir_tmp/ tree: absent (ok)"
+    echo "dead src/cli/commands/plugins_dir_tmp/ tree: absent (ok)"
 fi
 
-# --- theme seeds match the shipped set ------------------------------------------------
-seed_file="$SRC/commands/share/assets.rs"
+# --- external assets: only the base theme/layout stay embedded ----------------------
+seed_file="$SRC/core/assets/base.rs"
 seeds=$(grep -c 'include_str!("../../../assets/themes/' "$seed_file")
-miami_seeded=$(grep -c '"miami", include_str!("../../../assets/themes/miami.jsonc")' "$seed_file")
-echo "embedded theme seeds: $seeds (expect 12, miami included)"
-[ "$seeds" -eq 12 ] || fail=1
-[ "$miami_seeded" -ge 1 ] || { echo "  ^ miami missing from the embedded seeds"; fail=1; }
+x_seeded=$(grep -c 'assets/themes/x.jsonc' "$seed_file")
+echo "embedded theme seeds: $seeds (expect 1: x)"
+[ "$seeds" -eq 1 ] || fail=1
+[ "$x_seeded" -ge 1 ] || { echo "  ^ x missing from the embedded base seed"; fail=1; }
+
+extra_theme_embeds=$(grep -rn 'include_str!(.*assets/themes/' "$SRC" | grep -v 'src/core/assets/base.rs' | wc -l)
+echo "theme include_str! outside the base seed: $extra_theme_embeds (must be 0)"
+[ "$extra_theme_embeds" -eq 0 ] || fail=1
+
+if [ ! -f catalog.json ]; then
+    echo "catalog.json is missing at the repository root"
+    fail=1
+else
+    echo "catalog.json: present"
+fi
 
 # --- module graph sanity (imports of kernel areas from lower layers) -------------------
 echo "cross-area imports (info):"

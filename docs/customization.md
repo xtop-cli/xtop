@@ -47,8 +47,9 @@ directory (the same tree as <code>config.json</code> and the layouts):</p>
 %APPDATA%\xtop\themes\                       (Windows)
 </code></pre>
 
-<p>The directory and the shipped theme files are created automatically on
-first run; no manual copy is needed.</p>
+<p>The directory and the base <code>x.jsonc</code> file are created
+automatically on first run. Install the other themes with
+<code>xtop theme download &lt;name&gt;</code>.</p>
 
 <h3 id="theme-format">Format</h3>
 
@@ -125,7 +126,7 @@ happens at load only.</p>
 
 <p>This table is the single truthful role reference: the kernel theme
 accessors (<code>bg()</code>/<code>fg()</code>/<code>accent()</code>/<code>dim()</code> in
-<code>src/theme/model.rs</code>) and the widget packs' <code>ROLE_*</code> constants
+<code>src/core/theme/model.rs</code>) and the widget packs' <code>ROLE_*</code> constants
 (widgets repo, <code>src/util.rs</code>) map to exactly these slots, and the usage
 column reflects what the code really paints today. If a renderer needs a
 color, it takes it from here — no undocumented palette index. Text is drawn
@@ -202,18 +203,16 @@ should stay distinguishable from each other and from slots 1–8.</p>
 
 <h3 id="starter-themes">Starter Themes</h3>
 
-<p>xtop ships <strong>12 themes</strong>. The <code>x</code> palette (almost-black
-background, purple-pink accents) is compiled into the binary as the startup
-fallback; all 12 definitions — including <code>x</code> and <code>miami</code> —
-are embedded in the binary as seeding templates. The first run writes them
-into the themes directory above, so every shipped theme is available without
-copying anything.</p>
+<p>xtop defines <strong>12 themes</strong>. The <code>x</code> palette (almost-black
+background, purple-pink accents) is embedded in the binary as the startup
+fallback and base theme. The other themes are catalog assets: install them
+with <code>xtop theme download &lt;name&gt;</code> (or all at once with
+<code>xtop theme download --all</code>). Download metadata (version, author,
+license and checksum) is recorded in <code>assets.json</code> next to
+<code>config.json</code>.</p>
 
-<p>If you want to restore them later, copy from the repository:</p>
-
-<pre><code>cp -r assets/themes/* ~/.config/xtop/themes/   # Linux
-# macOS: ~/Library/Application Support/xtop/themes/
-</code></pre>
+<p>To restore the base theme file explicitly, run <code>xtop --gen-config</code>.
+The JSONC sources also live in the repository under <code>assets/themes/</code>.</p>
 
 <p><strong>Available themes:</strong> <code>x</code>, <code>berlin</code>, <code>bogota</code>,
 <code>helsinki</code>, <code>lahabana</code>, <code>london</code>, <code>madrid</code>,
@@ -224,19 +223,20 @@ copying anything.</p>
 
 <h3 id="switching-themes-from-the-cli">Switching Themes from the CLI</h3>
 
-<p><code>xtop --ct &lt;name&gt;</code> changes the active theme and persists it
-to <code>config.json</code>, so the next start uses it. A running instance
+<p><code>xtop --change-theme &lt;name&gt;</code> (or <code>xtop theme set
+&lt;name&gt;</code>) changes the active theme and persists it to
+<code>config.json</code>, so the next start uses it. A running instance
 follows the change live within one tick because the TUI run loop polls the
-persisted theme — no restart and no IPC needed. This is the hook for
+persisted selection — no restart and no IPC needed. This is the hook for
 external themers: e.g. a Hyprland theme switcher script can run
-<code>xtop --ct tokio</code> alongside its own theme changes. Unknown names
-fail with the list of available themes.</p>
+<code>xtop --change-theme tokio</code> alongside its own theme changes. Unknown
+names fail with the list of installed themes and a download hint.</p>
 
 <h3 id="loading-order">Loading Order</h3>
 
 <ol>
   <li>The compiled-in <code>x</code> palette (startup fallback, index 0).</li>
-  <li>Themes from the themes directory (seeded on first run) load on top;
+  <li>Themes from the themes directory (base, downloaded and user files) load on top;
       a file reusing the name <code>x</code> overrides the compiled palette in
       place.</li>
   <li>If a custom theme has the same name as a shipped one, it <strong>replaces</strong>
@@ -408,15 +408,17 @@ fail with the list of available themes.</p>
 
 <h3 id="starter-layouts">Starter Layouts</h3>
 
-<p>The 10 built-in layouts ship in the <code>xtop-layout</code> crate
-(<code>github.com/xtop-cli/layouts</code>, folder <code>layouts/default/</code>) and are embedded in the
-binary. On startup their JSONC sources are copied to the platform layouts
-directory (see <a href="#layout-location">Location</a>) as editable templates. Community layouts
-live in <code>layouts/custom/</code> of the same repo;
-install one with <code>xtop layout install &lt;name&gt;</code> (or copy the file into
-the layouts directory for your platform). Validate a local file with <code>xtop layout check &lt;file&gt;</code>.</p>
+<p>Only the primary <code>Dashboard</code> layout is embedded in the binary. The
+other default layouts and the community layouts are catalog assets under
+<code>github.com/xtop-cli/layouts</code>. Install them with
+<code>xtop layout download &lt;name&gt;</code> (or <code>xtop config download
+--all</code>); they land in the platform layouts directory (see <a
+href="#layout-location">Location</a>) with version, author and license
+metadata. <code>xtop layout install &lt;name&gt;</code> is an alias for
+<code>download</code>. Validate a local file with <code>xtop layout check
+&lt;file&gt;</code>.</p>
 
-<p>A layout file whose <code>name</code> matches a built-in layout <strong>overrides it</strong> (e.g.
+<p>A layout file whose <code>name</code> matches an installed layout <strong>overrides it</strong> (e.g.
 edit <code>dashboard.jsonc</code> to customize the Dashboard). Files with new names show up as
 extra layouts.</p>
 
@@ -537,7 +539,7 @@ The kernel ships two packs out of the box — the base pack
 (<code>default</code>, always compiled in) and the <code>blocks</code> pack
 (gated behind the <code>widget-blocks</code> Cargo feature) — and lists them
 in a single compile-time catalog
-(<code>src/ui/layout/pack_table.rs</code>, one <code>(feature, label)</code>
+(<code>src/tui/layout/pack_table.rs</code>, one <code>(feature, label)</code>
 row per pack), which the render engine and <code>xtop widget list</code>
 share.</p>
 
@@ -572,7 +574,7 @@ same spirit as <code>xtop plugin install</code>): it adds an optional
 dependency + a <code>widget-&lt;name&gt;</code> feature flag to the root
 <code>Cargo.toml</code>, appends one <code>(feature, label)</code> row and
 its registry-linking arm to the pack catalog in
-<code>src/ui/layout/pack_table.rs</code>, and runs <code>cargo check</code>.
+<code>src/tui/layout/pack_table.rs</code>, and runs <code>cargo check</code>.
 The pack is <strong>not enabled by default</strong>: add
 <code>widget-&lt;name&gt;</code> to the <code>[features]</code> default list
 (or build with <code>--features widget-&lt;name&gt;</code>) and rebuild.

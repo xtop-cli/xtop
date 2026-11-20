@@ -69,7 +69,7 @@
 <h2 id="theming">Theming</h2>
 
 <ul>
-  <li>12 color schemes: 12 JSONC theme files ship in <code>assets/themes/</code> and are embedded in the binary as first-run seeding templates.</li>
+  <li>12 color schemes: the base <code>x</code> theme is embedded; the other JSONC theme files are catalog assets installed with <code>xtop theme download &lt;name&gt;</code>.</li>
   <li>Custom themes defined as JSONC files with an explicit background/foreground pair and a 16-entry hex color palette (legacy 16-slot-only files still load).</li>
   <li>Always-legible themes: every theme is contrast-normalized at load (WCAG floors for text and mark roles, UX8.2); shipped files stay canonical.</li>
   <li>Instant theme cycling with <kbd>t</kbd> (next) and <kbd>T</kbd> (previous).</li>
@@ -81,7 +81,7 @@
 <h2 id="layouts">Layouts</h2>
 
 <ul>
-  <li>7 built-in layout modes: Dashboard, Vertical, Horizontal, CPU Focus, Memory Focus, Network Focus, Process Focus, plus 3 Detail preset layouts (<code>Detail Dashboard</code>, <code>Detail Network</code>, <code>Detail Processes</code>) that cycle after the modes and showcase per-widget display options.</li>
+  <li>Layout modes and presets: the primary <code>Dashboard</code> layout is embedded; the other mode layouts and the <code>Detail Dashboard</code>, <code>Detail Network</code> and <code>Detail Processes</code> presets are catalog assets installed with <code>xtop layout download &lt;name&gt;</code>.</li>
   <li>Custom layouts defined as JSONC files with a recursive split/widget tree; every widget instance can carry an <code>options</code> object (CPU basis, cores, ifaces, ...) driven by the layout file.</li>
   <li>Full-screen mode for any widget toggled with <kbd>f</kbd>.</li>
   <li>Responsive design that adapts to terminal width and height automatically.</li>
@@ -113,7 +113,7 @@
 <ul>
   <li>Plugins, widget packs, extensions and effects are compile-time (Cargo features + git dependencies); a plain build needs none of them.</li>
   <li>Runtime widgets (opt-in <code>plugin-wasm</code> and <code>plugin-external</code> features) load widgets that are not compiled into the kernel: sandboxed <code>.wasm</code> modules (wasmi, fuel and memory limits) or one helper process per widget in any language over line-delimited JSON. They register through the plugin path, keep precedence over packs, and are referenced in layouts by name — see <a href="customization.md#runtime-widgets">customization.md</a>.</li>
-  <li>External themers can switch the active theme with <code>xtop --ct &lt;theme&gt;</code>; running instances follow the persisted change within one tick.</li>
+  <li>External themers can switch the active theme with <code>xtop --change-theme &lt;theme&gt;</code>; running instances follow the persisted change within one tick.</li>
 </ul>
 
 <hr>

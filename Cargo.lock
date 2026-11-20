@@ -2079,6 +2079,7 @@ dependencies = [
  "ratatui",
  "serde",
  "serde_json",
+ "sha2",
  "sysinfo",
  "toml",
  "windows-sys",
@@ -2131,7 +2132,7 @@ dependencies = [
 [[package]]
 name = "xtop-layout"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/layouts#efe0d4dd07a32880bd24f4ece2210797521ed87c"
+source = "git+https://github.com/xtop-cli/layouts?branch=release%2Fv0.1.1#dd5076e40edfebf8321401336e528f0fca5e22bc"
 dependencies = [
  "serde",
  "serde_json",

@@ -12,6 +12,14 @@
 <p>On Linux you can override the base directory with
 <code>$XDG_CONFIG_HOME</code>.</p>
 
+<p>The base <code>x</code> theme and <code>Dashboard</code> layout are
+written here on first run (or with <code>xtop --gen-config</code>). Every
+other theme or layout is downloaded from the official catalog with
+<code>xtop theme download</code>, <code>xtop layout download</code> or
+<code>xtop config download</code>. Downloads are recorded in
+<code>assets.json</code> with version, author, license and checksum
+metadata.</p>
+
 <hr>
 
 <h2 id="keys">Keys</h2>
