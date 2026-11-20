@@ -17,10 +17,25 @@ use crate::core::assets::installed;
 pub const DEFAULT_CATALOG_URL: &str =
     "https://raw.githubusercontent.com/xtop-cli/xtop/main/catalog.json";
 
+/// Release-branch fallback used before the catalog is merged into `main`.
+/// The refs/heads spelling keeps branch names containing slashes unambiguous.
+const RELEASE_CATALOG_URL: &str =
+    "https://raw.githubusercontent.com/xtop-cli/xtop/refs/heads/release/v0.1.1/catalog.json";
+
 /// Where `xtop config download` looks for the catalog. Override with
 /// `XTOP_CATALOG_URL` for local testing or a mirror.
 pub fn catalog_url() -> String {
     std::env::var("XTOP_CATALOG_URL").unwrap_or_else(|_| DEFAULT_CATALOG_URL.to_string())
+}
+
+fn catalog_candidates() -> Vec<String> {
+    if let Ok(url) = std::env::var("XTOP_CATALOG_URL") {
+        return vec![url];
+    }
+    vec![
+        DEFAULT_CATALOG_URL.to_string(),
+        RELEASE_CATALOG_URL.to_string(),
+    ]
 }
 
 /// Result of one asset download attempt.
@@ -42,9 +57,14 @@ pub struct Report {
 
 /// Fetch and validate the catalog.
 pub fn fetch_catalog() -> anyhow::Result<Catalog> {
-    let url = catalog_url();
-    let bytes = fetch(&url)?;
-    Catalog::parse(&bytes)
+    let mut last_error = None;
+    for url in catalog_candidates() {
+        match fetch(&url).and_then(|bytes| Catalog::parse(&bytes)) {
+            Ok(catalog) => return Ok(catalog),
+            Err(error) => last_error = Some(error),
+        }
+    }
+    Err(last_error.unwrap_or_else(|| anyhow::anyhow!("no catalog URL configured")))
 }
 
 /// Download all assets of one kind.
