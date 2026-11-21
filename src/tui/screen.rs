@@ -55,20 +55,19 @@ pub fn render(f: &mut Frame, state: &mut AppState) {
 
     if state.full_screen_widget != FullScreenWidget::None {
         render_fullscreen(f, state, area);
-        return;
-    }
-
-    let mode = detect_effective_layout(area.width, area.height, state.layout_mode);
-    let pw = plugin_widgets(state);
-
-    if mode == EffectiveLayout::Minimal {
-        render_minimal(f, state, area);
     } else {
-        // The engine walks the layout tree while widget renderers run
-        // against `state`; hand it an unaliased copy of the current layout
-        // definition (small: a bounded tree of node names).
-        let def = state.current_layout().clone();
-        render_layout(f, state, area, &def, &pw);
+        let mode = detect_effective_layout(area.width, area.height, state.layout_mode);
+        let pw = plugin_widgets(state);
+
+        if mode == EffectiveLayout::Minimal {
+            render_minimal(f, state, area);
+        } else {
+            // The engine walks the layout tree while widget renderers run
+            // against `state`; hand it an unaliased copy of the current layout
+            // definition (small: a bounded tree of node names).
+            let def = state.current_layout().clone();
+            render_layout(f, state, area, &def, &pw);
+        }
     }
 
     if state.input_mode == InputMode::Searching {
@@ -86,7 +85,7 @@ fn render_too_small(f: &mut Frame, state: &AppState, area: Rect) {
 }
 
 fn render_search_overlay(f: &mut Frame, state: &AppState, area: Rect) {
-    use ratatui::widgets::{Block, Borders, Paragraph};
+    use ratatui::widgets::{Block, Borders, Clear, Paragraph};
     let fg = to_color(*state.current_theme.fg());
     let bg = to_color(*state.current_theme.bg());
     let accent = to_color(*state.current_theme.accent());
@@ -109,6 +108,7 @@ fn render_search_overlay(f: &mut Frame, state: &AppState, area: Rect) {
         width: 40.min(area.width),
         height: 3.min(area.height),
     };
+    f.render_widget(Clear, overlay_area);
     f.render_widget(overlay, overlay_area);
 }
 

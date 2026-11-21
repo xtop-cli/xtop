@@ -32,15 +32,16 @@ _xtop() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     case "$prev" in
+        status) COMPREPLY=( $(compgen -W "summary host cpu memory swap load uptime disks disk-io network battery gpu" -- "$cur") ); return ;;
         theme)  COMPREPLY=( $(compgen -W "list available current show set download path" -- "$cur") ); return ;;
         layout) COMPREPLY=( $(compgen -W "list available current show set download install check path" -- "$cur") ); return ;;
         addon) COMPREPLY=( $(compgen -W "list available install download path" -- "$cur") ); return ;;
         config) COMPREPLY=( $(compgen -W "download generate get set list reset path" -- "$cur") ); return ;;
         plugin) COMPREPLY=( $(compgen -W "list install scaffold" -- "$cur") ); return ;;
         widget) COMPREPLY=( $(compgen -W "list install scaffold" -- "$cur") ); return ;;
-        completions) COMPREPLY=( $(compgen -W "bash zsh fish powershell" -- "$cur") ); return ;;
+        completions) COMPREPLY=( $(compgen -W "bash zsh fish powershell pwsh" -- "$cur") ); return ;;
     esac
-    COMPREPLY=( $(compgen -W "status processes watch info doctor completions update addon theme layout config plugin widget mcp --help --version --change-theme --gen-config" -- "$cur") )
+    COMPREPLY=( $(compgen -W "status processes watch info doctor completions update addon theme layout config plugin widget mcp --help --version --change-theme --ct --gen-config" -- "$cur") )
 }
 complete -F _xtop xtop
 "#;
@@ -50,7 +51,7 @@ const ZSH: &str = r#"#compdef xtop
 _xtop() {
     local -a commands
     commands=(
-        'status:one-shot system snapshot'
+        'status:snapshot or one section'
         'processes:one-shot process list'
         'watch:periodic system snapshots'
         'info:build, path and tool information'
@@ -65,6 +66,7 @@ _xtop() {
         'widget:manage compiled-in widget packs'
         'mcp:run the MCP server'
         '--change-theme:change the active theme'
+        '--ct:deprecated alias for --change-theme'
         '--gen-config:create the base config and assets'
         '--version:print the version'
         '--help:print help'
@@ -76,20 +78,21 @@ _xtop "$@"
 
 const FISH: &str = r#"# xtop fish completion
 complete -c xtop -f -n '__fish_use_subcommand' -a 'status processes watch info doctor completions update addon theme layout config plugin widget mcp'
-complete -c xtop -f -n '__fish_use_subcommand' -a '--change-theme --gen-config --version --help'
+complete -c xtop -f -n '__fish_seen_subcommand_from status' -a 'summary host cpu memory swap load uptime disks disk-io network battery gpu'
+complete -c xtop -f -n '__fish_use_subcommand' -a '--change-theme --ct --gen-config --version --help'
 complete -c xtop -f -n '__fish_seen_subcommand_from theme' -a 'list available current show set download path'
 complete -c xtop -f -n '__fish_seen_subcommand_from layout' -a 'list available current show set download install check path'
 complete -c xtop -f -n '__fish_seen_subcommand_from addon' -a 'list available install download path'
 complete -c xtop -f -n '__fish_seen_subcommand_from config' -a 'download generate get set list reset path'
 complete -c xtop -f -n '__fish_seen_subcommand_from plugin' -a 'list install scaffold'
 complete -c xtop -f -n '__fish_seen_subcommand_from widget' -a 'list install scaffold'
-complete -c xtop -f -n '__fish_seen_subcommand_from completions' -a 'bash zsh fish powershell'
+complete -c xtop -f -n '__fish_seen_subcommand_from completions' -a 'bash zsh fish powershell pwsh'
 "#;
 
 const POWERSHELL: &str = r#"# xtop PowerShell completion
 Register-ArgumentCompleter -Native -CommandName xtop -ScriptBlock {
     param($wordToComplete, $commandAst, $cursorPosition)
-    $commands = 'status','processes','watch','info','doctor','completions','update','addon','theme','layout','config','plugin','widget','mcp','--change-theme','--gen-config','--version','--help'
+    $commands = 'status','processes','watch','info','doctor','completions','update','addon','theme','layout','config','plugin','widget','mcp','--change-theme','--ct','--gen-config','--version','--help'
     $commands | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
         [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
     }

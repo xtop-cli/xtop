@@ -6,27 +6,32 @@
 
 use crate::core::state::{AppState, PalettePage};
 use ratatui::prelude::*;
-use ratatui::widgets::{Block, Borders, List, ListItem, ListState, Paragraph};
+use ratatui::widgets::{Block, Borders, Clear, List, ListItem, ListState, Paragraph};
 use ratatui::Frame;
 use xtop_widget_api::glyph::{border_for, to_color};
+
+/// Centered frame used by the command bar. Kept separate so the renderer and
+/// the regression test agree on the cleared region.
+pub(crate) fn popup_area(area: Rect) -> Rect {
+    let width = (area.width as f64 * 0.6).min(60.0) as u16;
+    let height = (area.height as f64 * 0.6).min(30.0) as u16;
+    Rect {
+        x: area.x + area.width.saturating_sub(width) / 2,
+        y: area.y + area.height.saturating_sub(height) / 2,
+        width,
+        height,
+    }
+}
 
 pub fn render(f: &mut Frame, state: &AppState, area: Rect) {
     let fg = to_color(*state.current_theme.fg());
     let bg = to_color(*state.current_theme.bg());
     let accent = to_color(*state.current_theme.accent());
 
-    let popup_width = (area.width as f64 * 0.6).min(60.0) as u16;
-    let popup_height = (area.height as f64 * 0.6).min(30.0) as u16;
-    let popup_x = (area.width.saturating_sub(popup_width)) / 2;
-    let popup_y = (area.height.saturating_sub(popup_height)) / 2;
-
-    let popup = Rect {
-        x: popup_x,
-        y: popup_y,
-        width: popup_width,
-        height: popup_height,
-    };
-
+    let popup = popup_area(area);
+    // Clear only the popup: the live dashboard stays visible around it, but
+    // never shows through the input row or the list.
+    f.render_widget(Clear, popup);
     let title = state.palette.title();
     let block = Block::default()
         .title(Line::from(vec![Span::styled(
@@ -52,12 +57,8 @@ pub fn render(f: &mut Frame, state: &AppState, area: Rect) {
         PalettePage::Plugins => "Plugin",
     };
 
-    let search_area = Rect {
-        x: inner.x,
-        y: inner.y,
-        width: inner.width,
-        height: 3,
-    };
+    let chunks = Layout::vertical([Constraint::Length(3), Constraint::Min(1)]).split(inner);
+    let search_area = chunks[0];
     let input_text = if state.palette.query.is_empty() {
         format!(" {}_", hint)
     } else {
@@ -72,12 +73,7 @@ pub fn render(f: &mut Frame, state: &AppState, area: Rect) {
         );
     f.render_widget(input, search_area);
 
-    let list_area = Rect {
-        x: inner.x,
-        y: inner.y + 3,
-        width: inner.width,
-        height: inner.height.saturating_sub(3).max(1),
-    };
+    let list_area = chunks[1];
 
     let items: Vec<ListItem> = state
         .palette
@@ -85,7 +81,7 @@ pub fn render(f: &mut Frame, state: &AppState, area: Rect) {
         .iter()
         .map(|&entry_idx| {
             let entry = &state.palette.entries[entry_idx];
-            ListItem::new(entry.label.as_str()).style(Style::default().fg(fg))
+            ListItem::new(entry.label.as_str()).style(Style::default().fg(fg).bg(bg))
         })
         .collect();
 
