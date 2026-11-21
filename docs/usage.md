@@ -217,25 +217,20 @@ for the complete reference.</p>
   </thead>
   <tbody>
     <tr><td><code>xtop --help</code></td><td>Show global help</td></tr>
-    <tr><td><code>xtop status [--json]</code></td><td>One-shot system snapshot</td></tr>
+    <tr><td><code>xtop status [section] [--json]</code></td><td>Full snapshot or one section: cpu, memory, swap, load, uptime, disks, disk-io, network, battery, gpu</td></tr>
     <tr><td><code>xtop processes [--json]</code></td><td>One-shot process list</td></tr>
     <tr><td><code>xtop watch [--jsonl]</code></td><td>Periodic system snapshots</td></tr>
     <tr><td><code>xtop info</code> / <code>xtop doctor</code></td><td>Build/path information and local diagnostics</td></tr>
     <tr><td><code>xtop update</code></td><td>Update through xpm, pacman, cargo or the release binary installer</td></tr>
     <tr><td><code>xtop --gen-config</code></td><td>Create <code>config.json</code>, <code>themes/x.jsonc</code> and <code>layouts/dashboard.jsonc</code></td></tr>
     <tr><td><code>xtop --change-theme &lt;theme&gt;</code></td><td>Change the active theme (persists; running instances follow within one tick)</td></tr>
-    <tr><td><code>xtop theme list|available|current|set|download|path</code></td><td>Manage installed and downloadable themes</td></tr>
-    <tr><td><code>xtop layout list|available|current|set|download|check|path</code></td><td>Manage installed and downloadable layouts</td></tr>
-    <tr><td><code>xtop config download &lt;name|--all&gt;</code></td><td>Install themes or layouts from the official catalog</td></tr>
-    <tr><td><code>xtop config path</code></td><td>Print config and asset directories</td></tr>
+    <tr><td><code>xtop theme ...</code></td><td>Manage installed and downloadable themes; run <code>xtop theme --help</code></td></tr>
+    <tr><td><code>xtop layout ...</code></td><td>Manage installed and downloadable layouts; run <code>xtop layout --help</code></td></tr>
+    <tr><td><code>xtop addon ...</code></td><td>Manage installable themes and layouts; run <code>xtop addon --help</code></td></tr>
+    <tr><td><code>xtop config ...</code></td><td>Manage configuration and asset paths; run <code>xtop config --help</code></td></tr>
     <tr><td><code>xtop mcp</code></td><td>Start the MCP server (stdio transport) for AI agents</td></tr>
-    <tr><td><code>xtop plugin list</code></td><td>List plugins wired into the kernel <code>Cargo.toml</code></td></tr>
-    <tr><td><code>xtop plugin install &lt;name|url&gt;</code></td><td>Install a plugin (self-edits the kernel manifest)</td></tr>
-    <tr><td><code>xtop plugin scaffold &lt;name&gt;</code></td><td>Create a plugin crate template in <code>plugins-dev/</code></td></tr>
-    <tr><td><code>xtop widget list</code></td><td>List widget packs wired into the kernel (Cargo features + pack table)</td></tr>
-    <tr><td><code>xtop widget install &lt;name|url|path&gt;</code></td><td>Install a widget pack (self-edits the manifest + pack table)</td></tr>
-    <tr><td><code>xtop widget scaffold &lt;name&gt;</code></td><td>Create a single-widget pack crate template in <code>widgets-dev/</code></td></tr>
-    <tr><td><code>xtop layout check &lt;file&gt;</code></td><td>Validate a layout JSONC file</td></tr>
+    <tr><td><code>xtop plugin ...</code></td><td>Manage compiled plugins; run <code>xtop plugin --help</code></td></tr>
+    <tr><td><code>xtop widget ...</code></td><td>Manage compiled widget packs; run <code>xtop widget --help</code></td></tr>
   </tbody>
 </table>
 

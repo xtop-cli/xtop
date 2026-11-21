@@ -206,81 +206,6 @@ fn process_value(process: &ProcessInfo) -> Value {
     })
 }
 
-pub(crate) fn print_status(snapshot: &SystemSnapshot, info: &SystemInfo) {
-    println!("host: {}", empty_dash(&info.hostname));
-    println!(
-        "os: {} ({})",
-        empty_dash(&info.os_version),
-        empty_dash(&info.kernel)
-    );
-    if let Some(model) = info.cpu_model.as_deref() {
-        println!("cpu model: {model}");
-    }
-    let temp = if snapshot.cpu_temp > 0.0 {
-        format!(", {:.1} C", snapshot.cpu_temp)
-    } else {
-        String::new()
-    };
-    println!("cpu: {:.1}%{}", average_cpu(snapshot), temp);
-    println!(
-        "memory: {} / {} ({:.1}%)",
-        format_bytes(snapshot.memory.used),
-        format_bytes(snapshot.memory.total),
-        snapshot.memory.percent
-    );
-    println!(
-        "swap: {} / {} ({:.1}%)",
-        format_bytes(snapshot.swap.used),
-        format_bytes(snapshot.swap.total),
-        snapshot.swap.percent
-    );
-    println!(
-        "load: {:.2} {:.2} {:.2}",
-        snapshot.load_avg.one, snapshot.load_avg.five, snapshot.load_avg.fifteen
-    );
-    println!("uptime: {}", format_uptime(snapshot.uptime));
-    if !snapshot.disks.is_empty() {
-        println!("disks:");
-        for disk in &snapshot.disks {
-            println!(
-                "  {:<20} {} / {} ({:.1}%) {}",
-                disk.mount_point,
-                format_bytes(disk.used_space),
-                format_bytes(disk.total_space),
-                disk.percent,
-                disk.file_system
-            );
-        }
-    }
-    if !snapshot.networks.is_empty() {
-        println!("network:");
-        for net in &snapshot.networks {
-            println!(
-                "  {:<16} rx {}/s  tx {}/s",
-                net.name,
-                format_bytes(net.rx_speed as u64),
-                format_bytes(net.tx_speed as u64)
-            );
-        }
-    }
-    for battery in &snapshot.batteries {
-        println!(
-            "battery: {} {:.1}% ({})",
-            battery.name, battery.percentage, battery.state
-        );
-    }
-    for gpu in &snapshot.gpus {
-        println!(
-            "gpu: {} {:.1}% {:.1} C {} / {}",
-            gpu.name,
-            gpu.usage,
-            gpu.temperature,
-            format_bytes(gpu.memory_used),
-            format_bytes(gpu.memory_total)
-        );
-    }
-}
-
 pub(crate) fn print_processes(
     snapshot: &SystemSnapshot,
     sort: ProcessSortBy,
@@ -366,14 +291,6 @@ fn finite(value: f64) -> f64 {
         value
     } else {
         0.0
-    }
-}
-
-fn empty_dash(value: &str) -> &str {
-    if value.is_empty() {
-        "-"
-    } else {
-        value
     }
 }
 

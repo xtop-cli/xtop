@@ -12,32 +12,27 @@ fn help(args: &[&str]) -> std::process::Output {
 }
 
 #[test]
-fn global_help_lists_every_command_on_stdout() {
+fn global_help_lists_only_top_level_commands() {
     let out = help(&["--help"]);
     assert!(out.status.success());
     assert!(out.stderr.is_empty());
     let stdout = String::from_utf8_lossy(&out.stdout);
     assert!(stdout.starts_with("xtop - cross-platform TUI system monitor"));
     for command in [
-        "status",
-        "processes",
-        "watch",
+        "status [section]",
+        "processes [options]",
+        "watch [options]",
         "info",
         "doctor",
-        "completions",
-        "update",
-        "addon list",
-        "addon install",
+        "completions <shell>",
+        "update [options]",
+        "theme",
+        "layout",
+        "addon",
+        "config",
+        "plugin",
+        "widget",
         "mcp",
-        "theme list",
-        "theme download",
-        "layout list",
-        "layout set",
-        "layout download",
-        "config download",
-        "config generate",
-        "plugin install",
-        "widget install",
         "--change-theme <theme>",
         "--gen-config",
         "--version",
@@ -45,6 +40,74 @@ fn global_help_lists_every_command_on_stdout() {
     ] {
         assert!(stdout.contains(command), "missing help entry: {command}");
     }
+    for nested in [
+        "theme list",
+        "theme download",
+        "layout download",
+        "config download",
+        "addon list",
+        "plugin install",
+        "widget install",
+    ] {
+        assert!(
+            !stdout.contains(nested),
+            "global help repeats nested command: {nested}"
+        );
+    }
+}
+
+#[test]
+fn status_help_lists_sections_without_global_commands() {
+    let status = help(&["status", "--help"]);
+    assert!(status.status.success());
+    let status = String::from_utf8_lossy(&status.stdout);
+    assert!(status.starts_with("xtop status - "));
+    assert!(status.contains("xtop status [section] [--json]"));
+    assert!(status.contains("memory"));
+    assert!(status.contains("disk-io"));
+    assert!(!status.contains("theme list"));
+    assert!(!status.contains("config download"));
+
+    let memory = help(&["status", "memory", "--help"]);
+    assert!(memory.status.success());
+    let memory = String::from_utf8_lossy(&memory.stdout);
+    assert!(memory.starts_with("xtop status memory - "));
+    assert!(memory.contains("Usage:\n  xtop status memory [--json]"));
+    assert!(memory.contains("JSON key: memory."));
+}
+
+#[test]
+fn status_sections_return_only_their_slice() {
+    let memory = xtop()
+        .args(["status", "memory", "--json"])
+        .output()
+        .expect("run status memory");
+    assert!(memory.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&memory.stdout).expect("memory JSON");
+    assert_eq!(value["schema"], 1);
+    assert_eq!(value["kind"], "status");
+    assert!(value["memory"].is_object());
+    assert!(value.get("cpu").is_none());
+    assert!(value.get("disks").is_none());
+    assert!(value.get("processes").is_none());
+
+    let cpu = xtop()
+        .args(["status", "cpu", "--json"])
+        .output()
+        .expect("run status cpu");
+    assert!(cpu.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&cpu.stdout).expect("cpu JSON");
+    assert!(value["cpu"].is_object());
+    assert!(value.get("memory").is_none());
+
+    let human = xtop()
+        .args(["status", "memory"])
+        .output()
+        .expect("run status memory human");
+    assert!(human.status.success());
+    let human = String::from_utf8_lossy(&human.stdout);
+    assert!(human.starts_with("memory: "));
+    assert!(!human.contains("cpu: "));
 }
 
 #[test]
@@ -154,6 +217,37 @@ fn subcommand_help_lists_its_own_arguments() {
 }
 
 #[test]
+fn tui_requires_a_terminal_without_emitting_screen_sequences() {
+    let out = xtop().output().expect("run xtop without a terminal");
+    assert!(!out.status.success());
+    assert!(
+        out.stdout.is_empty(),
+        "non-TTY startup must not emit alternate-screen/mouse sequences"
+    );
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        stderr.contains("requires a terminal"),
+        "status={:?} stdout={:?} stderr={:?}",
+        out.status,
+        String::from_utf8_lossy(&out.stdout),
+        stderr
+    );
+}
+
+#[test]
+fn unknown_flags_are_usage_errors_not_tui() {
+    for flag in ["--ram", "-x"] {
+        let out = xtop().arg(flag).output().expect("run unknown flag");
+        assert_eq!(out.status.code(), Some(2), "flag {flag} must fail");
+        assert!(
+            out.stdout.is_empty(),
+            "unknown flag {flag} must not enter the TUI"
+        );
+        assert!(String::from_utf8_lossy(&out.stderr).contains("unknown option"));
+    }
+}
+
+#[test]
 fn usage_errors_exit_with_status_two() {
     for args in [
         vec!["plugin", "install"],
@@ -166,7 +260,11 @@ fn usage_errors_exit_with_status_two() {
         vec!["config", "download"],
         vec!["--change-theme"],
         vec!["--gen-config", "extra"],
+        vec!["--ram"],
+        vec!["-x"],
         vec!["status", "--bogus"],
+        vec!["status", "unknown"],
+        vec!["status", "memory", "cpu"],
         vec!["completions", "unknown"],
         vec!["update", "--bogus"],
         vec!["update", "--method", "unknown"],

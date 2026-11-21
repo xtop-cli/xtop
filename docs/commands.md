@@ -6,10 +6,10 @@ commands configure themes, layouts, plugins and widget packs.
 
 Help is layered:
 
-- `xtop --help` (or `xtop -h`) lists every command and global option.
+- `xtop --help` (or `xtop -h`) lists the top-level commands and groups.
 - `xtop <group> --help` lists the commands in one group.
 - `xtop <group> <command> --help` lists the arguments and notes for one
-  command.
+  command; `xtop status <section> --help` documents one status section.
 - `xtop --change-theme --help` and `xtop --gen-config --help` document the
   global flags.
 
@@ -28,8 +28,12 @@ xtop --version
 xtop --help
 ```
 
-Running `xtop` with no arguments starts the TUI. An unrecognized first
-argument also starts the TUI; this preserves the original entry behavior.
+Running `xtop` with no arguments starts the TUI. An unrecognized
+positional command also starts the TUI; this preserves the original entry
+behavior. Unknown flags are usage errors (exit status 2) and never open the
+TUI. There are no per-metric top-level flags such as `--cpu`, `--ram` or
+`--disk`; use `xtop status`, `xtop processes` and `xtop watch` for metric
+state.
 
 ### Global options
 
@@ -45,50 +49,27 @@ argument also starts the TUI; this preserves the original entry behavior.
 | Command | Description |
 | --- | --- |
 | `xtop` | Start the interactive TUI system monitor. |
-| `xtop status` | Print a one-shot system snapshot. |
-| `xtop processes` | Print a one-shot process list. |
-| `xtop watch` | Print periodic system snapshots. |
-| `xtop info` | Show build, path and tool information. |
-| `xtop doctor` | Diagnose the local installation. |
+| `xtop status [section] [--json]` | Print a snapshot or one section; see [`xtop status`](#xtop-status). |
+| `xtop processes [options]` | Print a sortable, filterable process list. |
+| `xtop watch [options]` | Print periodic system snapshots. |
+| `xtop info [--json]` | Show build, path and tool information. |
+| `xtop doctor [--json]` | Diagnose the local installation. |
 | `xtop completions <shell>` | Print bash, zsh, fish or PowerShell completions. |
-| `xtop update` | Update through the detected installation medium. |
+| `xtop update [options]` | Update through the detected installation medium. |
+| `xtop theme ...` | Manage themes; run `xtop theme --help`. |
+| `xtop layout ...` | Manage layouts; run `xtop layout --help`. |
+| `xtop addon ...` | Manage installable themes and layouts; run `xtop addon --help`. |
+| `xtop config ...` | Manage configuration and paths; run `xtop config --help`. |
+| `xtop plugin ...` | Manage compiled plugins; run `xtop plugin --help`. |
+| `xtop widget ...` | Manage widget packs; run `xtop widget --help`. |
 | `xtop mcp` | Start the MCP server over stdio for AI agents. |
-| `xtop theme list` | List installed themes. |
-| `xtop theme available` | List the official theme catalog. |
-| `xtop theme current` | Print the persisted theme. |
-| `xtop theme show <theme>` | Show an installed theme and its palette. |
-| `xtop theme set <theme>` | Persist the active theme. |
-| `xtop theme download <theme>` | Install one theme, or all themes with `--all`, from the catalog. |
-| `xtop theme path` | Print the user themes directory. |
-| `xtop layout list` | List effective installed layouts. |
-| `xtop layout available` | List the official layout catalog. |
-| `xtop layout current` | Print the persisted layout. |
-| `xtop layout show <layout>` | Show an installed layout and its JSONC source. |
-| `xtop layout set <layout>` | Persist the active layout. |
-| `xtop layout download <layout>` | Install one layout, or all layouts with `--all`, from the catalog. |
-| `xtop layout install <layout>` | Alias for `layout download`; accepts the same `--all` flag. |
-| `xtop layout check <file>` | Validate a layout JSONC/JSON file. |
-| `xtop layout path` | Print the user layouts directory. |
-| `xtop config download <name>` | Download a theme or layout by name, or everything with `--all`. |
-| `xtop config generate` | Create the base config and assets. |
-| `xtop config get <key.path>` | Print one configuration value. |
-| `xtop config set <key.path> <value>` | Update and validate a configuration value. |
-| `xtop config list` | Print the effective configuration as JSON. |
-| `xtop config reset --yes` | Restore `config.json` to defaults. |
-| `xtop config path` | Print config and asset directories. |
-| `xtop addon list` | List installed themes and layouts. |
-| `xtop addon available` | List the installable asset catalog. |
-| `xtop addon install <name>` | Install a theme or layout, or everything with `--all`. |
-| `xtop addon download <name>` | Alias for `addon install`. |
-| `xtop addon path` | Print theme and layout directories. |
-| `xtop plugin list` | List plugins wired into the kernel manifest. |
-| `xtop plugin install <name\|url>` | Add a plugin as an optional git dependency and feature. |
-| `xtop plugin scaffold <name>` | Create a plugin crate template under `plugins-dev/`. |
-| `xtop widget list` | List widget packs wired into the kernel. |
-| `xtop widget install <name\|url\|path>` | Add a widget pack as an optional dependency and feature. |
-| `xtop widget scaffold <name>` | Create a single-widget pack template under `widgets-dev/`. |
 
-## TUI
+The table lists the top-level commands only; each group prints its own
+leaves with `xtop <group> --help`. Group aliases: `xtop themes` is
+`xtop theme`, `xtop layouts` is `xtop layout`, and `xtop addons` is
+`xtop addon`.
+
+## TUI## TUI
 
 ```
 xtop
@@ -96,7 +77,9 @@ xtop
 
 Starts the interactive system monitor. Keybindings, layouts, fullscreen
 mode, the command bar and process filtering are documented in
-[usage.md](usage.md).
+[usage.md](usage.md). The TUI requires stdin and stdout to be TTYs; a
+redirected invocation exits with a clear error instead of emitting terminal
+escape sequences.
 
 ## Headless monitoring
 
@@ -106,26 +89,54 @@ without a full-screen session and quick checks.
 ### `xtop status`
 
 ```
-xtop status [--json]
+xtop status [section] [--json]
 ```
 
-Samples CPU, memory, swap, load, uptime, disks, network interfaces,
-batteries and GPUs. The sampler takes two samples with a short pause so CPU
-and rate values are meaningful in the first output.
+Without a section, prints the complete snapshot: CPU, memory (RAM), swap,
+load, uptime, disks, disk I/O, network interfaces, batteries and GPUs. The sampler
+takes two samples with a short pause so CPU and rate values are meaningful
+in the first output.
 
-`--json` prints one machine-readable object with schema version 1.
+Each section is a quick query for one part of the state:
+
+| Section | Reports | JSON key |
+| --- | --- | --- |
+| `summary` | Complete snapshot (default) | all keys |
+| `host` | Hostname, OS, kernel, desktop, shell and CPU model | `host` |
+| `cpu` | Aggregate usage/temperature and per-core details | `cpu` |
+| `memory` | RAM total, used, available, free and percentage | `memory` |
+| `swap` | Swap total, used, free and percentage | `swap` |
+| `load` | One, five and fifteen minute load averages | `load` |
+| `uptime` | System uptime | `uptime_seconds` |
+| `disks` | Mount points, filesystems and space | `disks` |
+| `disk-io` | Per-device read/write totals and rates | `disk_io` |
+| `network` | Interfaces with current RX/TX rates | `networks` |
+| `battery` | Batteries with charge percentage and state | `batteries` |
+| `gpu` | GPUs with usage, temperature and memory | `gpus` |
+
+Aliases: `mem`/`ram` for `memory`, `disk_io`/`io` for `disk-io`, `net` for
+`network`, `batteries` for `battery`, `gpus` for `gpu`, and `all` for
+`summary`.
+
+`--json` prints one machine-readable object with schema version 1. With a
+section, the object keeps `schema`, `kind` and only that section's key; for
+example `xtop status memory --json` returns `memory`.
+
+For the process list use `xtop processes`; it has its own sorting, filtering
+and JSON options.
 
 ### `xtop processes`
 
 ```
-xtop processes [--json] [--sort cpu|memory|pid|name] [--asc|--desc]
+xtop processes [--json] [--sort cpu|memory|mem|pid|name] [--asc|--desc]
                [--limit N] [--filter TEXT]
 ```
 
 Prints a process table. CPU and memory are sampled over a short interval.
 The default sort is CPU descending and the default limit is 20; `--limit 0`
 prints every process in the snapshot. `--filter` matches process names.
-`--json` omits the process environment and full argv.
+`mem` is accepted as an alias for `memory`. `--json` omits the process
+environment and full argv.
 
 ### `xtop watch`
 
@@ -137,6 +148,40 @@ Repeats the status snapshot. The default interval is 1000 ms; values below
 100 ms are clamped. Without `--count`, the command runs until it is
 interrupted. `--jsonl` (and `--json`) prints one compact JSON object per
 sample.
+
+## Current state inspection
+
+`xtop status` is the one-shot view of the current host state; the
+[status section table](#xtop-status) above is the metric map. Use the
+section commands for quick answers: `xtop status memory`, `xtop status cpu`,
+`xtop status disk-io`, and so on. There is no separate top-level `--ram`
+flag.
+
+The rest of the state is available from these commands:
+
+| Command | Current state reported |
+| --- | --- |
+| `xtop processes [--json]` | Process table; JSON includes `pid`, `name`, `cpu_percent`, `memory_bytes`, `user_id`, `state`, `cmd`, `exe_path`, `parent_pid`, `start_time_epoch`, `run_time_seconds`, `thread_count`, `open_files` and `session_id`. |
+| `xtop watch [--jsonl]` | Repeated snapshots for live monitoring or streaming into another tool. |
+| `xtop info [--json]` | Build, enabled features, config/asset paths, local asset counts and tool availability. |
+| `xtop doctor [--json]` | Installation diagnostics: directory writability, config/manifest parsing, base assets, catalog and external tools. |
+| `xtop config list` | Effective persisted configuration. |
+| `xtop config path` | Config, themes, layouts and installed-assets paths. |
+| `xtop theme current` / `xtop layout current` | Active theme and layout. |
+| `xtop addon list` / `xtop plugin list` / `xtop widget list` | Installed assets, compiled plugins and widget packs. |
+
+For scripting, combine the section output with your JSON tool of choice:
+
+```sh
+xtop status memory
+xtop status memory --json
+xtop status cpu --json
+xtop processes --json --sort memory --limit 10
+xtop watch --jsonl --count 1
+```
+
+See [core.md](core.md) for the snapshot model, providers and platform
+coverage behind these commands.
 
 ## Diagnostics
 
@@ -162,11 +207,12 @@ Warnings do not fail; failed checks exit with status 1.
 ## Shell completions
 
 ```
-xtop completions <bash|zsh|fish|powershell>
+xtop completions <bash|zsh|fish|powershell|pwsh>
 ```
 
-Prints a completion script to stdout. Source it from the shell startup file
-or install it in the shell's completion directory.
+Prints a completion script to stdout. `pwsh` is an alias for `powershell`.
+Source the script from the shell startup file or install it in the shell's
+completion directory.
 
 ## MCP server
 
@@ -469,7 +515,7 @@ Options:
 | --- | --- |
 | `--check` | Print installed/latest versions and whether an update exists. |
 | `--dry-run` | Detect the medium and print the command without running it. |
-| `--method <auto\|xpm\|pacman\|cargo\|binary>` | Override detection. |
+| `--method <auto\|xpm\|pacman\|cargo\|binary\|bin>` | Override detection. `bin` is an alias for `binary`. |
 | `--yes`, `-y` | Non-interactive package-manager confirmation and `sudo -n`. |
 | `--force` | Reinstall or force a cargo update. |
 | `--all-features` | Cargo only: rebuild with every feature. |
@@ -503,8 +549,8 @@ xtop addon path
 entry carries its version, author and license, and downloads are verified
 against the catalog SHA-256.
 
-The plural group names `xtop themes` and `xtop layouts` are aliases for
-`xtop theme` and `xtop layout`.
+The plural group names `xtop themes`, `xtop layouts` and `xtop addons` are
+aliases for `xtop theme`, `xtop layout` and `xtop addon`.
 
 Plugins and widget packs are not runtime addons: `xtop plugin` and
 `xtop widget` edit the kernel source and rebuild it. They are documented
@@ -654,6 +700,8 @@ xtop theme download --help
 # Headless monitoring
 xtop status
 xtop status --json
+xtop status memory
+xtop status cpu --json
 xtop processes --sort memory --limit 10
 xtop watch --count 5 --interval 2000
 xtop info

@@ -12,6 +12,14 @@
 - Updated GPL-3.0-or-later licensing, docs, tests and the structural audit.
 - Fixed the command bar drawing over the live dashboard; it stays centered
   and now clears its frame and gives every list row an explicit background.
+- Added focused `xtop status <section>` queries (including `memory`/`ram`)
+  and a hierarchical help tree: the global help lists groups only, while
+  `xtop status --help` and the group help pages list their own leaves.
+- Unknown top-level flags now fail with a usage error instead of opening
+  the interactive TUI.
+- The interactive TUI now checks that stdin/stdout are TTYs before emitting
+  escape sequences, rolls back a failed terminal entry, and restores the
+  terminal on initialization or run-loop errors.
 
 Security-hardening pass (release/v0.1.0 branch):
 
