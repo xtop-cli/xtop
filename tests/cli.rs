@@ -224,7 +224,14 @@ fn tui_requires_a_terminal_without_emitting_screen_sequences() {
         out.stdout.is_empty(),
         "non-TTY startup must not emit alternate-screen/mouse sequences"
     );
-    assert!(String::from_utf8_lossy(&out.stderr).contains("requires a terminal"));
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        stderr.contains("requires a terminal"),
+        "status={:?} stdout={:?} stderr={:?}",
+        out.status,
+        String::from_utf8_lossy(&out.stdout),
+        stderr
+    );
 }
 
 #[test]
