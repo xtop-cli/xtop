@@ -10,6 +10,8 @@
   headless status/processes/watch commands, info/doctor, completions and
   self-update with installation-medium detection.
 - Updated GPL-3.0-or-later licensing, docs, tests and the structural audit.
+- Fixed the command bar drawing over the live dashboard; it stays centered
+  and now clears its frame and gives every list row an explicit background.
 
 Security-hardening pass (release/v0.1.0 branch):
 

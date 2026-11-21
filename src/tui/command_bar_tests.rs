@@ -72,3 +72,42 @@ fn slash_opens_command_bar_and_ctrl_f_filters_processes() {
     );
     assert_eq!(state.input_mode, InputMode::Searching);
 }
+
+#[test]
+fn command_bar_clears_its_centered_frame() {
+    use crate::tui::overlay::palette;
+    use ratatui::backend::TestBackend;
+    use ratatui::layout::Rect;
+    use ratatui::widgets::Paragraph;
+    use ratatui::Terminal;
+
+    let mut state = state();
+    handle_key(
+        &mut state,
+        KeyEvent::new(KeyCode::Char('/'), KeyModifiers::NONE),
+    );
+    let backend = TestBackend::new(80, 24);
+    let mut terminal = Terminal::new(backend).unwrap();
+    let popup = palette::popup_area(Rect::new(0, 0, 80, 24));
+    terminal
+        .draw(|f| {
+            f.render_widget(Paragraph::new("UNDERLAY"), popup);
+            crate::tui::screen::render(f, &mut state);
+        })
+        .unwrap();
+
+    let rendered: String = terminal
+        .backend()
+        .buffer()
+        .content()
+        .iter()
+        .map(|cell| cell.symbol())
+        .collect();
+    let frame: String = (popup.y..popup.bottom())
+        .flat_map(|y| (popup.x..popup.right()).map(move |x| (x, y)))
+        .map(|(x, y)| terminal.backend().buffer()[(x, y)].symbol())
+        .collect();
+    assert!(!frame.contains("UNDERLAY"));
+    assert!(rendered.contains("Command Bar"));
+    assert!(popup.width < 80 && popup.height < 24);
+}

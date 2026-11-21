@@ -135,7 +135,10 @@
 <h2 id="command-palette">Command Bar</h2>
 
 <p>Press <kbd>/</kbd> or <kbd>ctrl+p</kbd> to open the command bar. It is a
-searchable, layered list of actions and pages: <strong>Main</strong>
+centered command view: its frame is cleared before drawing, so the live
+dashboard stays visible around it but never shows through the list. It is a
+searchable, layered list of
+actions and pages: <strong>Main</strong>
 (themes/layouts/plugins/processes, full-screen, help, sort, random theme,
 exit), <strong>Themes</strong>, <strong>Layouts</strong> and
 <strong>Plugins</strong>. The Processes entry enters the interactive process
