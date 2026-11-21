@@ -438,9 +438,8 @@ The official catalog is `catalog.json` at the root of the
 - `file` (safe destination file name), `url` (raw asset URL) and `sha256`.
 
 The default catalog URL is
-`https://raw.githubusercontent.com/xtop-cli/xtop/main/catalog.json`. Release
-branches fall back to their release catalog while the file is not yet on
-`main`. Set `XTOP_CATALOG_URL` to use a local file, mirror or test catalog.
+`https://raw.githubusercontent.com/xtop-cli/xtop/main/catalog.json`. Set
+`XTOP_CATALOG_URL` to use a local file, mirror or test catalog.
 
 Downloads are recorded in `$XDG_CONFIG_HOME/xtop/assets.json` (or the
 platform equivalent) with version, author, license and checksum metadata.

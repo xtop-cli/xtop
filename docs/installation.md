@@ -48,7 +48,7 @@ the current platform, verify the release <code>SHA256SUMS</code> and, when
 <p>Pin a version, choose a prefix or install system-wide:</p>
 
 <pre><code># Specific version
-curl -fsSL https://raw.githubusercontent.com/xtop-cli/xtop/main/install-prebuilt.sh | bash -s -- --version 0.1.0
+curl -fsSL https://raw.githubusercontent.com/xtop-cli/xtop/main/install-prebuilt.sh | bash -s -- --version 0.1.1
 
 # User prefix (default: ~/.local; binary in ~/.local/bin)
 bash install-prebuilt.sh --prefix "$HOME/.local" --yes
@@ -76,7 +76,7 @@ the line to add to the shell profile.</p>
 user <code>PATH</code> unless <code>-NoPath</code> is given.</p>
 
 <pre><code># Specific version
-.\install-prebuilt.ps1 -Version 0.1.0
+.\install-prebuilt.ps1 -Version 0.1.1
 
 # Custom binary directory
 .\install-prebuilt.ps1 -BinDir C:\tools\bin
@@ -112,7 +112,7 @@ Manual verification:</p>
 
 <pre><code>cosign verify-blob \
   --bundle SHA256SUMS.bundle \
-  --certificate-identity "https://github.com/xtop-cli/xtop/.github/workflows/release.yml@refs/tags/v0.1.0" \
+  --certificate-identity "https://github.com/xtop-cli/xtop/.github/workflows/release.yml@refs/tags/v0.1.1" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   SHA256SUMS
 sha256sum -c SHA256SUMS

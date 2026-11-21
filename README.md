@@ -123,7 +123,7 @@
 
 <pre><code>irm https://raw.githubusercontent.com/xtop-cli/xtop/main/install-prebuilt.ps1 | iex</code></pre>
 
-<p>Pin a version with <code>--version 0.1.0</code> (or <code>-Version 0.1.0</code> on Windows). The installers verify the release <code>SHA256SUMS</code> and, when cosign is available, the keyless signature. See <a href="docs/installation.md">docs/installation.md</a> for prefixes and verification flags.</p>
+<p>Pin a version with <code>--version 0.1.1</code> (or <code>-Version 0.1.1</code> on Windows). The installers verify the release <code>SHA256SUMS</code> and, when cosign is available, the keyless signature. See <a href="docs/installation.md">docs/installation.md</a> for prefixes and verification flags.</p>
 
 <h3>From source</h3>
 

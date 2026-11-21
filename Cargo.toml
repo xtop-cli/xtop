@@ -1,6 +1,6 @@
 [package]
 name = "xtop"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 rust-version = "1.87"
 license = "GPL-3.0-or-later"
@@ -30,9 +30,9 @@ xtop-extension-api = { git = "https://github.com/xtop-cli/api" }
 xtop-widget-api = { git = "https://github.com/xtop-cli/api" }
 xtop-effect-api = { git = "https://github.com/xtop-cli/api", optional = true }
 # xtop-cli/widgets (base and alternative packs, in their own repo).
-xtop-widgets = { git = "https://github.com/xtop-cli/widgets", branch = "release/v0.1.1" }
-xtop-widget-blocks = { git = "https://github.com/xtop-cli/widgets", branch = "release/v0.1.1", optional = true }
-xtop-layout = { git = "https://github.com/xtop-cli/layouts", branch = "release/v0.1.1" }
+xtop-widgets = { git = "https://github.com/xtop-cli/widgets" }
+xtop-widget-blocks = { git = "https://github.com/xtop-cli/widgets", optional = true }
+xtop-layout = { git = "https://github.com/xtop-cli/layouts" }
 xtop-extension-mcp = { git = "https://github.com/xtop-cli/extensions", optional = true }
 xtop-plugin-samurai = { git = "https://github.com/xtop-cli/plugins", optional = true }
 xtop-effect-fade = { git = "https://github.com/xtop-cli/effects", optional = true }

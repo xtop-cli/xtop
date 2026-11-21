@@ -329,7 +329,7 @@
       "author": "Xscriptor",
       "license": "GPL-3.0-or-later",
       "file": "process_tree.jsonc",
-      "url": "https://raw.githubusercontent.com/xtop-cli/layouts/7a595715f32322333d48742baf013d1e8a4a12d1/layouts/custom/process_tree.jsonc",
+      "url": "https://raw.githubusercontent.com/xtop-cli/layouts/main/layouts/custom/process_tree.jsonc",
       "sha256": "21d552ede94adcffd5433ba72117081d4cbae0e033c7286feee102b725d26098",
       "base": false
     }

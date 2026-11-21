@@ -1,7 +1,7 @@
 # Xtop design language
 
 Scope note for readers: this document states the visual design rules xtop
-renders by (the 0.1.0 kernel + the widget packs in their UX working state,
+renders by (the 0.1.1 kernel + the widget packs in their UX working state,
 2026-09-04): theme roles, glyph sets, per-widget display options,
 minimum-width fallbacks and chart color rules. Widget-side claims are
 cross-checked against the widgets repo working tree of the same date; the
