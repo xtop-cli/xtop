@@ -51,6 +51,7 @@ argument also starts the TUI; this preserves the original entry behavior.
 | `xtop info` | Show build, path and tool information. |
 | `xtop doctor` | Diagnose the local installation. |
 | `xtop completions <shell>` | Print bash, zsh, fish or PowerShell completions. |
+| `xtop update` | Update through the detected installation medium. |
 | `xtop mcp` | Start the MCP server over stdio for AI agents. |
 | `xtop theme list` | List installed themes. |
 | `xtop theme available` | List the official theme catalog. |
@@ -446,6 +447,40 @@ platform equivalent) with version, author, license and checksum metadata.
 The catalog is the source of truth; the manifest describes what is
 installed locally.
 
+## Updates
+
+```
+xtop update [options]
+```
+
+Detects how the running binary was installed and uses the same medium:
+
+- **xpm**: package owner from `xpm query --owner`, updated with
+  `xpm install --needed <pkg>`.
+- **pacman**: package owner from `pacman -Qoq`, updated with
+  `pacman -S --needed <pkg>`.
+- **cargo**: detected from the cargo bin directory or `cargo install --list`,
+  updated with `cargo install --git https://github.com/xtop-cli/xtop --locked --force`.
+- **binary**: standalone release binary, updated with the official prebuilt
+  installer for the current platform and binary directory.
+
+Options:
+
+| Option | Description |
+| --- | --- |
+| `--check` | Print installed/latest versions and whether an update exists. |
+| `--dry-run` | Detect the medium and print the command without running it. |
+| `--method <auto\|xpm\|pacman\|cargo\|binary>` | Override detection. |
+| `--yes`, `-y` | Non-interactive package-manager confirmation and `sudo -n`. |
+| `--force` | Reinstall or force a cargo update. |
+| `--all-features` | Cargo only: rebuild with every feature. |
+| `--version <version>` | Cargo/binary only: target a specific release. |
+| `--json` | Print a machine-readable result. |
+
+Package-manager updates use `sudo` when the process is not running as root.
+The command never writes configuration outside the platform config directory
+(`~/.config/xtop` on Linux, or the macOS/Windows equivalent).
+
 ## Addons
 
 ```
@@ -611,6 +646,8 @@ xtop
 
 # Print version, global help and scoped help
 xtop --version
+xtop update --check
+xtop update --dry-run
 xtop --help
 xtop theme --help
 xtop theme download --help

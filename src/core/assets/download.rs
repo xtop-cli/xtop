@@ -202,6 +202,11 @@ fn validate_content(kind: AssetKind, bytes: &[u8]) -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Fetch a URL or local file path. Shared with the self-update command.
+pub(crate) fn fetch_url(url: &str) -> anyhow::Result<Vec<u8>> {
+    fetch(url)
+}
+
 fn fetch(url: &str) -> anyhow::Result<Vec<u8>> {
     if let Some(path) = url.strip_prefix("file://") {
         return fs::read(path).map_err(|error| anyhow::anyhow!("failed to read {}: {error}", path));

@@ -29,6 +29,7 @@ Commands:
   info                                    Show build, path and tool information
   doctor                                  Diagnose the local installation
   completions <shell>                     Print bash/zsh/fish/PowerShell completions
+  update                                  Update through xpm, pacman, cargo or the binary installer
   addon list                              List installed themes and layouts
   addon available                         List the installable asset catalog
   addon install <name|--all>              Install themes or layouts

@@ -22,6 +22,7 @@ pub use base::{
     layouts_dir, themes_dir, SeededPath, BASE_AUTHOR, BASE_LICENSE, BASE_THEME_NAME, BASE_VERSION,
 };
 pub use catalog::{Asset, AssetKind, Catalog, CatalogBase};
+pub(crate) use download::fetch_url;
 pub use download::{
     catalog_url, download_config, download_kind, fetch_catalog, Outcome, Report,
     DEFAULT_CATALOG_URL,

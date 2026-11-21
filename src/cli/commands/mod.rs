@@ -16,4 +16,5 @@ pub mod status;
 pub mod system;
 pub mod theme;
 pub mod tui;
+pub mod update;
 pub mod watch;

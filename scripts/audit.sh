@@ -81,22 +81,34 @@ check_budget() {
     fi
 }
 
+is_group_dir() {
+    case "$1" in
+        "$SRC/core"|"$SRC/cli"|"$SRC/cli/commands") return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+check_tree() {
+    local label="$1" dir="${2%/}"
+    if is_group_dir "$dir"; then
+        local root_loc
+        root_loc=$(find "$dir" -maxdepth 1 -name '*.rs' -exec cat {} + 2>/dev/null | wc -l)
+        total_loc=$((total_loc + root_loc))
+        echo "  $label(root): $root_loc"
+        [ "$root_loc" -gt 2400 ] && { echo "    ^ exceeds 2400"; fail=1; }
+        for sub in "$dir"/*/; do
+            [ -d "$sub" ] || continue
+            check_tree "$label/$(basename "$sub")" "$sub"
+        done
+    else
+        check_budget "$label" "$dir"
+    fi
+}
+
 echo "-- LOC per area (platform/ budgeted separately):"
 for area in "$SRC"/*; do
     [ -d "$area" ] || continue
-    name=$(basename "$area")
-    if [ "$name" = "core" ] || [ "$name" = "cli" ]; then
-        group_root=$(find "$area" -maxdepth 1 -name '*.rs' -exec cat {} + 2>/dev/null | wc -l)
-        total_loc=$((total_loc + group_root))
-        echo "  $name(root): $group_root"
-        [ "$group_root" -gt 2400 ] && { echo "    ^ exceeds 2400"; fail=1; }
-        for sub in "$area"/*/; do
-            [ -d "$sub" ] || continue
-            check_budget "$name/$(basename "$sub")" "$sub"
-        done
-    else
-        check_budget "$name" "$area"
-    fi
+    check_tree "$(basename "$area")" "$area"
 done
 
 main_loc=$(wc -l < "$SRC/main.rs")

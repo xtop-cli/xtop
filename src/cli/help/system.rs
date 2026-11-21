@@ -91,3 +91,26 @@ Writes the completion script to stdout.
 
 Options:
   -h, --help    Show this help and exit";
+
+pub(crate) const UPDATE: &str = "\
+xtop update - update the running installation
+
+Usage:
+  xtop update [options]
+
+Detects the installation medium and uses the same one:
+  xpm     installed by the X package manager
+  pacman  installed by pacman
+  cargo   installed under the cargo bin directory or via cargo install
+  binary  standalone release binary; uses the official prebuilt installer
+
+Options:
+  --check              Print the installed/latest versions and the command
+  --dry-run            Detect the medium and print the command without running
+  --method <method>    Force auto, xpm, pacman, cargo or binary
+  --yes, -y            Non-interactive package-manager confirmation and sudo -n
+  --force              Reinstall or force a cargo update
+  --all-features       Use --all-features for a cargo installation
+  --version <version>  Target a release version (cargo and binary)
+  --json               Print a machine-readable result
+  -h, --help           Show this help and exit";

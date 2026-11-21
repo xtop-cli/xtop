@@ -25,6 +25,7 @@ fn global_help_lists_every_command_on_stdout() {
         "info",
         "doctor",
         "completions",
+        "update",
         "addon list",
         "addon install",
         "mcp",
@@ -125,6 +126,7 @@ fn subcommand_help_lists_its_own_arguments() {
         (vec!["info", "--help"], "xtop info"),
         (vec!["doctor", "--help"], "xtop doctor"),
         (vec!["completions", "--help"], "xtop completions"),
+        (vec!["update", "--help"], "xtop update"),
         (
             vec!["plugin", "install", "--help"],
             "xtop plugin install <name|url>",
@@ -166,6 +168,8 @@ fn usage_errors_exit_with_status_two() {
         vec!["--gen-config", "extra"],
         vec!["status", "--bogus"],
         vec!["completions", "unknown"],
+        vec!["update", "--bogus"],
+        vec!["update", "--method", "unknown"],
     ] {
         let out = xtop().args(&args).output().expect("run usage error");
         assert_eq!(
@@ -506,6 +510,65 @@ fn addon_list_and_path_cover_external_assets() {
     assert!(path.contains("themes:"));
     assert!(path.contains("layouts:"));
     let _ = fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn update_dry_run_reports_medium_and_command() {
+    for (method, expected) in [
+        ("cargo", "cargo install --git"),
+        ("binary", "install-prebuilt"),
+    ] {
+        let out = xtop()
+            .args(["update", "--dry-run", "--method", method, "--json"])
+            .output()
+            .expect("run update dry-run");
+        assert!(out.status.success(), "dry-run failed for {method}");
+        let value: serde_json::Value =
+            serde_json::from_slice(&out.stdout).expect("update dry-run JSON");
+        assert_eq!(value["method"], method);
+        assert_eq!(value["executed"], false);
+        assert!(
+            value["command"].as_str().unwrap_or("").contains(expected),
+            "missing command for {method}: {value}"
+        );
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn update_detects_xpm_and_pacman_package_ownership() {
+    use std::os::unix::fs::PermissionsExt;
+
+    for (tool, package) in [("xpm", "fake-xpm"), ("pacman", "fake-pacman")] {
+        let dir = std::env::temp_dir().join(format!("xtop-update-{}-{}", tool, std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).expect("create fake tool dir");
+        let script = dir.join(tool);
+        fs::write(&script, format!("#!/bin/sh\nprintf '%s\\n' '{package}'\n"))
+            .expect("write fake tool");
+        fs::set_permissions(&script, fs::Permissions::from_mode(0o755)).expect("chmod fake tool");
+
+        let path = format!(
+            "{}:{}",
+            dir.display(),
+            std::env::var("PATH").unwrap_or_default()
+        );
+        let out = xtop()
+            .env("PATH", path)
+            .args(["update", "--dry-run", "--json"])
+            .output()
+            .expect("run update detection");
+        assert!(out.status.success(), "detection failed for {tool}");
+        let value: serde_json::Value =
+            serde_json::from_slice(&out.stdout).expect("update detection JSON");
+        assert_eq!(value["method"], tool);
+        assert_eq!(value["package"], package);
+        assert!(
+            value["command"].as_str().unwrap_or("").contains(package),
+            "command missing package for {tool}: {value}"
+        );
+        let _ = fs::remove_dir_all(&dir);
+    }
 }
 
 #[test]

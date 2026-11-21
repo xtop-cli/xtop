@@ -53,6 +53,9 @@ pub fn run() -> anyhow::Result<()> {
             "completions" => {
                 return commands::completions::completions_command(&args);
             }
+            "update" => {
+                return commands::update::update_command(&args);
+            }
             "theme" | "themes" => {
                 return commands::theme::theme_command(&args);
             }

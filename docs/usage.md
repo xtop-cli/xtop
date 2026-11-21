@@ -211,6 +211,7 @@ for the complete reference.</p>
     <tr><td><code>xtop processes [--json]</code></td><td>One-shot process list</td></tr>
     <tr><td><code>xtop watch [--jsonl]</code></td><td>Periodic system snapshots</td></tr>
     <tr><td><code>xtop info</code> / <code>xtop doctor</code></td><td>Build/path information and local diagnostics</td></tr>
+    <tr><td><code>xtop update</code></td><td>Update through xpm, pacman, cargo or the release binary installer</td></tr>
     <tr><td><code>xtop --gen-config</code></td><td>Create <code>config.json</code>, <code>themes/x.jsonc</code> and <code>layouts/dashboard.jsonc</code></td></tr>
     <tr><td><code>xtop --change-theme &lt;theme&gt;</code></td><td>Change the active theme (persists; running instances follow within one tick)</td></tr>
     <tr><td><code>xtop theme list|available|current|set|download|path</code></td><td>Manage installed and downloadable themes</td></tr>
