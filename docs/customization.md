@@ -424,6 +424,8 @@ extra layouts.</p>
 
 <p><strong>Mode layouts:</strong> <code>dashboard</code>, <code>vertical</code>, <code>horizontal</code>, <code>cpu_focus</code>, <code>memory_focus</code>, <code>network_focus</code>, <code>process_focus</code> — these seven map to the layout modes.</p>
 
+<p><strong>Opt-in addon:</strong> <code>process_tree</code> (<code>Process Tree</code>) renders the processes widget as a parent/child tree with <code>└─</code>/<code>├─</code> connectors. It is not a default and is installed with <code>xtop layout download process_tree</code>.</p>
+
 <p><strong>Preset extras:</strong> <code>detail_dashboard</code>, <code>detail_network</code>, <code>detail_processes</code> — detail-focused layouts appended after the modes (not modes themselves; they are selected by name). They exercise per-widget display options (CPU basis on <code>processes</code>, <code>cores</code>/<code>show_freq</code> on <code>cpu</code>, <code>ifaces</code> on <code>network</code>); see the per-widget options section below.</p>
 
 <h3 id="cycling-order">Cycling Order</h3>

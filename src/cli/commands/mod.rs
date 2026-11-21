@@ -4,6 +4,7 @@
 //! frontend. Shared assembly and asset helpers live in `core::bootstrap` and
 //! `core::assets`.
 
+pub mod addon;
 pub mod completions;
 pub mod config;
 mod download;

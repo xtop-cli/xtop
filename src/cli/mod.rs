@@ -53,10 +53,13 @@ pub fn run() -> anyhow::Result<()> {
             "completions" => {
                 return commands::completions::completions_command(&args);
             }
-            "theme" => {
+            "theme" | "themes" => {
                 return commands::theme::theme_command(&args);
             }
-            "layout" => {
+            "addon" | "addons" => {
+                return commands::addon::addon_command(&args);
+            }
+            "layout" | "layouts" => {
                 return commands::layout::layout_command(&args);
             }
             "config" => {

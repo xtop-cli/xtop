@@ -75,6 +75,11 @@ argument also starts the TUI; this preserves the original entry behavior.
 | `xtop config list` | Print the effective configuration as JSON. |
 | `xtop config reset --yes` | Restore `config.json` to defaults. |
 | `xtop config path` | Print config and asset directories. |
+| `xtop addon list` | List installed themes and layouts. |
+| `xtop addon available` | List the installable asset catalog. |
+| `xtop addon install <name>` | Install a theme or layout, or everything with `--all`. |
+| `xtop addon download <name>` | Alias for `addon install`. |
+| `xtop addon path` | Print theme and layout directories. |
 | `xtop plugin list` | List plugins wired into the kernel manifest. |
 | `xtop plugin install <name\|url>` | Add a plugin as an optional git dependency and feature. |
 | `xtop plugin scaffold <name>` | Create a plugin crate template under `plugins-dev/`. |
@@ -440,6 +445,40 @@ Downloads are recorded in `$XDG_CONFIG_HOME/xtop/assets.json` (or the
 platform equivalent) with version, author, license and checksum metadata.
 The catalog is the source of truth; the manifest describes what is
 installed locally.
+
+## Addons
+
+```
+xtop addon <command> [arguments]
+```
+
+Addons are the installable, non-core assets: themes and layouts. They are
+plain JSONC files in the user config directory and can be installed one by
+one or together:
+
+```sh
+xtop addon list
+xtop addon available
+xtop addon install <name>
+xtop addon install --all
+xtop addon install <name|--all> --force
+xtop addon path
+```
+
+`xtop addon install` and `xtop addon download` are interchangeable. Each
+entry carries its version, author and license, and downloads are verified
+against the catalog SHA-256.
+
+The plural group names `xtop themes` and `xtop layouts` are aliases for
+`xtop theme` and `xtop layout`.
+
+Plugins and widget packs are not runtime addons: `xtop plugin` and
+`xtop widget` edit the kernel source and rebuild it. They are documented
+below.
+
+Process-tree example: once the releases are merged, download the opt-in
+layout with `xtop layout download process_tree` (or `xtop addon install
+process_tree`); it is not part of the embedded default set.
 
 ## Plugins
 

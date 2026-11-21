@@ -320,6 +320,18 @@
       "url": "https://raw.githubusercontent.com/xtop-cli/layouts/main/layouts/custom/wasm_procs_focus.jsonc",
       "sha256": "204968f751694ed4cbd0e7d2692bbbccfad03a05c1838c9cc334665e95c2b9bb",
       "base": false
+    },
+    {
+      "id": "process_tree",
+      "name": "Process Tree",
+      "category": "custom",
+      "version": "1.0.0",
+      "author": "Xscriptor",
+      "license": "GPL-3.0-or-later",
+      "file": "process_tree.jsonc",
+      "url": "https://raw.githubusercontent.com/xtop-cli/layouts/refs/heads/release/v0.1.1/layouts/custom/process_tree.jsonc",
+      "sha256": "21d552ede94adcffd5433ba72117081d4cbae0e033c7286feee102b725d26098",
+      "base": false
     }
   ]
 }

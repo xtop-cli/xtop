@@ -2198,7 +2198,7 @@ dependencies = [
 [[package]]
 name = "xtop-widget-api"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/api#865e7b9baa2bc03dcc1f95c77e5066d31d678c9a"
+source = "git+https://github.com/xtop-cli/api#9aa60d6ecfce46c56afb7ed759803769a7b65d4f"
 dependencies = [
  "ratatui",
  "serde",
@@ -2209,7 +2209,7 @@ dependencies = [
 [[package]]
 name = "xtop-widget-battery"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/widgets#78dd578f7aa4d5d36d14697b7c8de572ba9fd36d"
+source = "git+https://github.com/xtop-cli/widgets?branch=release%2Fv0.1.1#73806d3d0c91d48ea755a0899599519d3b3d25f5"
 dependencies = [
  "ratatui",
  "xtop-plugin-api",
@@ -2220,7 +2220,7 @@ dependencies = [
 [[package]]
 name = "xtop-widget-blocks"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/widgets#78dd578f7aa4d5d36d14697b7c8de572ba9fd36d"
+source = "git+https://github.com/xtop-cli/widgets?branch=release%2Fv0.1.1#73806d3d0c91d48ea755a0899599519d3b3d25f5"
 dependencies = [
  "ratatui",
  "serde_json",
@@ -2232,7 +2232,7 @@ dependencies = [
 [[package]]
 name = "xtop-widget-core"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/widgets#78dd578f7aa4d5d36d14697b7c8de572ba9fd36d"
+source = "git+https://github.com/xtop-cli/widgets?branch=release%2Fv0.1.1#73806d3d0c91d48ea755a0899599519d3b3d25f5"
 dependencies = [
  "ratatui",
  "serde_json",
@@ -2243,7 +2243,7 @@ dependencies = [
 [[package]]
 name = "xtop-widget-cpu"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/widgets#78dd578f7aa4d5d36d14697b7c8de572ba9fd36d"
+source = "git+https://github.com/xtop-cli/widgets?branch=release%2Fv0.1.1#73806d3d0c91d48ea755a0899599519d3b3d25f5"
 dependencies = [
  "ratatui",
  "serde_json",
@@ -2255,7 +2255,7 @@ dependencies = [
 [[package]]
 name = "xtop-widget-disk_io"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/widgets#78dd578f7aa4d5d36d14697b7c8de572ba9fd36d"
+source = "git+https://github.com/xtop-cli/widgets?branch=release%2Fv0.1.1#73806d3d0c91d48ea755a0899599519d3b3d25f5"
 dependencies = [
  "ratatui",
  "xtop-plugin-api",
@@ -2266,7 +2266,7 @@ dependencies = [
 [[package]]
 name = "xtop-widget-gpu"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/widgets#78dd578f7aa4d5d36d14697b7c8de572ba9fd36d"
+source = "git+https://github.com/xtop-cli/widgets?branch=release%2Fv0.1.1#73806d3d0c91d48ea755a0899599519d3b3d25f5"
 dependencies = [
  "ratatui",
  "xtop-plugin-api",
@@ -2277,7 +2277,7 @@ dependencies = [
 [[package]]
 name = "xtop-widget-header"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/widgets#78dd578f7aa4d5d36d14697b7c8de572ba9fd36d"
+source = "git+https://github.com/xtop-cli/widgets?branch=release%2Fv0.1.1#73806d3d0c91d48ea755a0899599519d3b3d25f5"
 dependencies = [
  "ratatui",
  "xtop-plugin-api",
@@ -2288,7 +2288,7 @@ dependencies = [
 [[package]]
 name = "xtop-widget-memory"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/widgets#78dd578f7aa4d5d36d14697b7c8de572ba9fd36d"
+source = "git+https://github.com/xtop-cli/widgets?branch=release%2Fv0.1.1#73806d3d0c91d48ea755a0899599519d3b3d25f5"
 dependencies = [
  "ratatui",
  "serde_json",
@@ -2300,7 +2300,7 @@ dependencies = [
 [[package]]
 name = "xtop-widget-network"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/widgets#78dd578f7aa4d5d36d14697b7c8de572ba9fd36d"
+source = "git+https://github.com/xtop-cli/widgets?branch=release%2Fv0.1.1#73806d3d0c91d48ea755a0899599519d3b3d25f5"
 dependencies = [
  "ratatui",
  "serde_json",
@@ -2312,7 +2312,7 @@ dependencies = [
 [[package]]
 name = "xtop-widget-processes"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/widgets#78dd578f7aa4d5d36d14697b7c8de572ba9fd36d"
+source = "git+https://github.com/xtop-cli/widgets?branch=release%2Fv0.1.1#73806d3d0c91d48ea755a0899599519d3b3d25f5"
 dependencies = [
  "ratatui",
  "serde_json",
@@ -2335,7 +2335,7 @@ dependencies = [
 [[package]]
 name = "xtop-widget-sensors"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/widgets#78dd578f7aa4d5d36d14697b7c8de572ba9fd36d"
+source = "git+https://github.com/xtop-cli/widgets?branch=release%2Fv0.1.1#73806d3d0c91d48ea755a0899599519d3b3d25f5"
 dependencies = [
  "ratatui",
  "xtop-plugin-api",
@@ -2346,7 +2346,7 @@ dependencies = [
 [[package]]
 name = "xtop-widget-storage"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/widgets#78dd578f7aa4d5d36d14697b7c8de572ba9fd36d"
+source = "git+https://github.com/xtop-cli/widgets?branch=release%2Fv0.1.1#73806d3d0c91d48ea755a0899599519d3b3d25f5"
 dependencies = [
  "ratatui",
  "serde_json",
@@ -2358,7 +2358,7 @@ dependencies = [
 [[package]]
 name = "xtop-widget-summary"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/widgets#78dd578f7aa4d5d36d14697b7c8de572ba9fd36d"
+source = "git+https://github.com/xtop-cli/widgets?branch=release%2Fv0.1.1#73806d3d0c91d48ea755a0899599519d3b3d25f5"
 dependencies = [
  "ratatui",
  "xtop-plugin-api",
@@ -2369,7 +2369,7 @@ dependencies = [
 [[package]]
 name = "xtop-widgets"
 version = "0.1.0"
-source = "git+https://github.com/xtop-cli/widgets#78dd578f7aa4d5d36d14697b7c8de572ba9fd36d"
+source = "git+https://github.com/xtop-cli/widgets?branch=release%2Fv0.1.1#73806d3d0c91d48ea755a0899599519d3b3d25f5"
 dependencies = [
  "xtop-widget-api",
  "xtop-widget-battery",

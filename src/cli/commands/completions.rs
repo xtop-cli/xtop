@@ -34,12 +34,13 @@ _xtop() {
     case "$prev" in
         theme)  COMPREPLY=( $(compgen -W "list available current show set download path" -- "$cur") ); return ;;
         layout) COMPREPLY=( $(compgen -W "list available current show set download install check path" -- "$cur") ); return ;;
+        addon) COMPREPLY=( $(compgen -W "list available install download path" -- "$cur") ); return ;;
         config) COMPREPLY=( $(compgen -W "download generate get set list reset path" -- "$cur") ); return ;;
         plugin) COMPREPLY=( $(compgen -W "list install scaffold" -- "$cur") ); return ;;
         widget) COMPREPLY=( $(compgen -W "list install scaffold" -- "$cur") ); return ;;
         completions) COMPREPLY=( $(compgen -W "bash zsh fish powershell" -- "$cur") ); return ;;
     esac
-    COMPREPLY=( $(compgen -W "status processes watch info doctor completions theme layout config plugin widget mcp --help --version --change-theme --gen-config" -- "$cur") )
+    COMPREPLY=( $(compgen -W "status processes watch info doctor completions addon theme layout config plugin widget mcp --help --version --change-theme --gen-config" -- "$cur") )
 }
 complete -F _xtop xtop
 "#;
@@ -72,10 +73,11 @@ _xtop "$@"
 "#;
 
 const FISH: &str = r#"# xtop fish completion
-complete -c xtop -f -n '__fish_use_subcommand' -a 'status processes watch info doctor completions theme layout config plugin widget mcp'
+complete -c xtop -f -n '__fish_use_subcommand' -a 'status processes watch info doctor completions addon theme layout config plugin widget mcp'
 complete -c xtop -f -n '__fish_use_subcommand' -a '--change-theme --gen-config --version --help'
 complete -c xtop -f -n '__fish_seen_subcommand_from theme' -a 'list available current show set download path'
 complete -c xtop -f -n '__fish_seen_subcommand_from layout' -a 'list available current show set download install check path'
+complete -c xtop -f -n '__fish_seen_subcommand_from addon' -a 'list available install download path'
 complete -c xtop -f -n '__fish_seen_subcommand_from config' -a 'download generate get set list reset path'
 complete -c xtop -f -n '__fish_seen_subcommand_from plugin' -a 'list install scaffold'
 complete -c xtop -f -n '__fish_seen_subcommand_from widget' -a 'list install scaffold'

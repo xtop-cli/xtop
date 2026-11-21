@@ -25,6 +25,8 @@ fn global_help_lists_every_command_on_stdout() {
         "info",
         "doctor",
         "completions",
+        "addon list",
+        "addon install",
         "mcp",
         "theme list",
         "theme download",
@@ -66,6 +68,14 @@ fn group_help_is_scoped_to_the_group() {
     assert!(config.contains("get <key.path>"));
     assert!(config.contains("set <key.path> <value>"));
 
+    let addon = help(&["addon", "--help"]);
+    assert!(addon.status.success());
+    assert!(String::from_utf8_lossy(&addon.stdout).contains("install <name|--all>"));
+
+    let plural = help(&["layouts", "--help"]);
+    assert!(plural.status.success());
+    assert!(String::from_utf8_lossy(&plural.stdout).contains("xtop layout - "));
+
     let plugin = help(&["plugin", "--help"]);
     assert!(plugin.status.success());
     assert!(String::from_utf8_lossy(&plugin.stdout).contains("install <name|url>"));
@@ -87,6 +97,10 @@ fn subcommand_help_lists_its_own_arguments() {
         (
             vec!["layout", "check", "--help"],
             "xtop layout check <file.jsonc|file.json>",
+        ),
+        (
+            vec!["addon", "install", "--help"],
+            "xtop addon install <name>",
         ),
         (
             vec!["config", "download", "--help"],
@@ -465,6 +479,33 @@ fn theme_and_layout_show_print_the_installed_model() {
     let layout = String::from_utf8_lossy(&layout.stdout);
     assert!(layout.contains("name: Dashboard"));
     assert!(layout.contains("\"name\": \"Dashboard\""));
+}
+
+#[test]
+fn addon_list_and_path_cover_external_assets() {
+    let dir = std::env::temp_dir().join(format!("xtop-addon-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&dir);
+    let list = xtop()
+        .env("XDG_CONFIG_HOME", &dir)
+        .args(["addon", "list"])
+        .output()
+        .expect("run addon list");
+    assert!(list.status.success());
+    let list = String::from_utf8_lossy(&list.stdout);
+    assert!(list.contains("themes:"));
+    assert!(list.contains("layouts:"));
+    assert!(list.contains("Dashboard"));
+
+    let path = xtop()
+        .env("XDG_CONFIG_HOME", &dir)
+        .args(["addon", "path"])
+        .output()
+        .expect("run addon path");
+    assert!(path.status.success());
+    let path = String::from_utf8_lossy(&path.stdout);
+    assert!(path.contains("themes:"));
+    assert!(path.contains("layouts:"));
+    let _ = fs::remove_dir_all(&dir);
 }
 
 #[test]

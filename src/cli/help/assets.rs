@@ -384,3 +384,82 @@ layout selection. Requires --yes to avoid accidental data loss.
 Options:
   --yes         Confirm the reset
   -h, --help    Show this help and exit";
+
+pub(crate) const ADDON: &str = "\
+xtop addon - manage installable themes and layouts
+
+Usage:
+  xtop addon <command> [arguments]
+
+Commands:
+  list                    List installed themes and layouts
+  available               List the official catalog
+  install <name|--all>    Install a theme or layout (alias: download)
+  download <name|--all>   Install a theme or layout
+  path                    Print the theme and layout directories
+
+Options:
+  --all                   Install every theme and layout in the catalog
+  --force                 Replace existing files
+  -h, --help              Show this help and exit
+
+Plugins and widget packs are compile-time developer tooling; use
+'xtop plugin' and 'xtop widget' for those.";
+
+pub(crate) const ADDON_LIST: &str = "\
+xtop addon list - list installed themes and layouts
+
+Usage:
+  xtop addon list
+
+Options:
+  -h, --help    Show this help and exit";
+
+pub(crate) const ADDON_AVAILABLE: &str = "\
+xtop addon available - list the official catalog
+
+Usage:
+  xtop addon available
+
+Fetches the catalog and prints every theme and layout with version, author,
+license and installed state.
+
+Options:
+  -h, --help    Show this help and exit";
+
+pub(crate) const ADDON_INSTALL: &str = "\
+xtop addon install - install themes or layouts from the catalog
+
+Usage:
+  xtop addon install <name>
+  xtop addon install --all
+  xtop addon install <name|--all> --force
+
+Options:
+  --all         Install every theme and layout in the catalog
+  --force       Replace existing files
+  -h, --help    Show this help and exit";
+
+pub(crate) const ADDON_DOWNLOAD: &str = "\
+xtop addon download - install themes or layouts from the catalog
+
+Usage:
+  xtop addon download <name>
+  xtop addon download --all
+  xtop addon download <name|--all> --force
+
+This is an alias for 'xtop addon install'.
+
+Options:
+  --all         Install every theme and layout in the catalog
+  --force       Replace existing files
+  -h, --help    Show this help and exit";
+
+pub(crate) const ADDON_PATH: &str = "\
+xtop addon path - print the theme and layout directories
+
+Usage:
+  xtop addon path
+
+Options:
+  -h, --help    Show this help and exit";

@@ -29,6 +29,11 @@ Commands:
   info                                    Show build, path and tool information
   doctor                                  Diagnose the local installation
   completions <shell>                     Print bash/zsh/fish/PowerShell completions
+  addon list                              List installed themes and layouts
+  addon available                         List the installable asset catalog
+  addon install <name|--all>              Install themes or layouts
+  addon download <name|--all>             Alias for addon install
+  addon path                              Print theme and layout directories
   mcp                                     Run the MCP server over stdio
   theme list                              List installed themes
   theme available                         List the remote theme catalog
