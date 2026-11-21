@@ -105,6 +105,9 @@ pub struct Config {
     /// feature ignore this key entirely.
     #[serde(default)]
     pub effect: Option<String>,
+    /// Plugin ids disabled by the user from the command bar.
+    #[serde(default)]
+    pub disabled_plugins: Vec<String>,
 }
 
 impl Default for Config {
@@ -119,6 +122,7 @@ impl Default for Config {
             keybindings: Keybindings::default(),
             style: UiStyle::default(),
             effect: None,
+            disabled_plugins: Vec::new(),
         }
     }
 }

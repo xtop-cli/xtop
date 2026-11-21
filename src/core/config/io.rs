@@ -19,6 +19,17 @@ pub fn load_config() -> Config {
             // Guard against a busy-looping event loop (interval 0 = spin at
             // 100% CPU sampling the system every frame).
             cfg.update_interval_ms = cfg.update_interval_ms.clamp(100, 3_600_000);
+            // The command bar replaces the old `/` process-search key. Keep
+            // existing configs usable by moving that binding once in memory.
+            if let Some(position) = cfg.keybindings.search.iter().position(|key| key == "/") {
+                cfg.keybindings.search.remove(position);
+                if cfg.keybindings.search.is_empty() {
+                    cfg.keybindings.search.push("ctrl+f".into());
+                }
+                if !cfg.keybindings.command_palette.iter().any(|key| key == "/") {
+                    cfg.keybindings.command_palette.push("/".into());
+                }
+            }
             return cfg;
         }
     }

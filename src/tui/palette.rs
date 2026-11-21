@@ -30,7 +30,11 @@ impl AppState {
                     action: Action::CycleFullscreen,
                 });
                 self.palette.entries.push(PaletteEntry {
-                    label: "Search Processes".into(),
+                    label: "Plugins →".into(),
+                    action: Action::NavigatePlugins,
+                });
+                self.palette.entries.push(PaletteEntry {
+                    label: "Processes (filter) →".into(),
                     action: Action::Search,
                 });
                 self.palette.entries.push(PaletteEntry {
@@ -68,6 +72,27 @@ impl AppState {
                         label: layout.name.clone(),
                         action: Action::SelectLayout(i),
                     });
+                }
+            }
+            PalettePage::Plugins => {
+                let plugins = self.plugin_infos();
+                if plugins.is_empty() {
+                    self.palette.entries.push(PaletteEntry {
+                        label: "(no plugins registered)".into(),
+                        action: Action::Noop,
+                    });
+                } else {
+                    for plugin in plugins {
+                        self.palette.entries.push(PaletteEntry {
+                            label: format!(
+                                "{} {} ({})",
+                                if plugin.enabled { "Disable" } else { "Enable" },
+                                plugin.name,
+                                plugin.id
+                            ),
+                            action: Action::TogglePlugin(plugin.id),
+                        });
+                    }
                 }
             }
         }

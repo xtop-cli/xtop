@@ -14,6 +14,8 @@
 //! - [`overlay`]        kernel-owned UI chrome (help, command palette)
 
 mod actions;
+#[cfg(test)]
+mod command_bar_tests;
 pub mod effects;
 pub mod input;
 pub mod layout;

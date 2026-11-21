@@ -17,7 +17,7 @@ pub struct Keybindings {
     pub toggle_fullscreen: Vec<String>,
     #[serde(default = "vec_one_shift_f")]
     pub cycle_fullscreen: Vec<String>,
-    #[serde(default = "vec_one_slash")]
+    #[serde(default = "vec_one_ctrl_f")]
     pub search: Vec<String>,
     #[serde(default = "vec_one_ctrl_p")]
     pub command_palette: Vec<String>,
@@ -54,11 +54,11 @@ fn vec_one_f() -> Vec<String> {
 fn vec_one_shift_f() -> Vec<String> {
     vec!["F".into()]
 }
-fn vec_one_slash() -> Vec<String> {
-    vec!["/".into()]
+fn vec_one_ctrl_f() -> Vec<String> {
+    vec!["ctrl+f".into()]
 }
 fn vec_one_ctrl_p() -> Vec<String> {
-    vec!["ctrl+p".into(), "ctrl+P".into()]
+    vec!["ctrl+p".into(), "ctrl+P".into(), "/".into()]
 }
 fn vec_one_escape() -> Vec<String> {
     vec!["escape".into()]
@@ -86,7 +86,7 @@ impl Default for Keybindings {
             next_layout: vec_one_l(),
             toggle_fullscreen: vec_one_f(),
             cycle_fullscreen: vec_one_shift_f(),
-            search: vec_one_slash(),
+            search: vec_one_ctrl_f(),
             command_palette: vec_one_ctrl_p(),
             cancel: vec_one_escape(),
             kill_process: vec_one_k(),
@@ -114,6 +114,9 @@ pub enum Action {
     SelectLayout(usize),
     NavigateThemes,
     NavigateLayouts,
+    NavigatePlugins,
+    TogglePlugin(String),
+    Noop,
     KillProcess,
     ProcessUp,
     ProcessDown,
@@ -133,6 +136,7 @@ impl Action {
                 | Action::NextLayout
                 | Action::SelectTheme(_)
                 | Action::SelectLayout(_)
+                | Action::TogglePlugin(_)
         )
     }
 }
@@ -182,5 +186,26 @@ impl Keybindings {
             return Some(Action::SortByCpu);
         }
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn command_bar_binding_replaces_the_old_search_key() {
+        let bindings = Keybindings::default();
+        assert_eq!(bindings.search, vec!["ctrl+f".to_string()]);
+        assert!(bindings.command_palette.iter().any(|key| key == "/"));
+        assert!(bindings.command_palette.iter().any(|key| key == "ctrl+p"));
+    }
+
+    #[test]
+    fn actions_persist_theme_layout_and_plugin_changes() {
+        assert!(Action::SelectTheme(0).persists());
+        assert!(Action::SelectLayout(0).persists());
+        assert!(Action::TogglePlugin("samurai".into()).persists());
+        assert!(!Action::Search.persists());
     }
 }

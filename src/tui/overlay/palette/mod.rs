@@ -40,15 +40,16 @@ pub fn render(f: &mut Frame, state: &AppState, area: Rect) {
     let inner = block.inner(popup);
     f.render_widget(block, popup);
 
-    let hint = if state.palette.page == PalettePage::Main {
-        " Filter: type to search · navigate with ↑↓ · select with Enter"
-    } else {
-        " Filter themes · Enter to select · Esc/Bksp to go back"
+    let hint = match state.palette.page {
+        PalettePage::Main => " Command bar · filter: type · ↑↓ navigate · Enter select",
+        PalettePage::Plugins => " Plugins · Enter enable/disable · Esc/Bksp back",
+        PalettePage::Themes | PalettePage::Layouts => " Filter · Enter select · Esc/Bksp back",
     };
     let input_label = match state.palette.page {
-        PalettePage::Main => "Action",
+        PalettePage::Main => "Command",
         PalettePage::Themes => "Theme",
         PalettePage::Layouts => "Layout",
+        PalettePage::Plugins => "Plugin",
     };
 
     let search_area = Rect {

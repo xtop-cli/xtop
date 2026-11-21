@@ -95,7 +95,7 @@ xtop
 ```
 
 Starts the interactive system monitor. Keybindings, layouts, fullscreen
-mode, process search and the command palette are documented in
+mode, the command bar and process filtering are documented in
 [usage.md](usage.md).
 
 ## Headless monitoring

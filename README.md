@@ -161,7 +161,8 @@ cargo run --release</code></pre>
     <tr><td><kbd>t</kbd> / <kbd>T</kbd></td><td>Next / previous theme</td></tr>
     <tr><td><kbd>l</kbd></td><td>Next layout mode</td></tr>
     <tr><td><kbd>f</kbd> / <kbd>F</kbd></td><td>Toggle / cycle full-screen</td></tr>
-    <tr><td><kbd>/</kbd></td><td>Search processes</td></tr>
+    <tr><td><kbd>/</kbd> / <kbd>ctrl+p</kbd></td><td>Open the command bar</td></tr>
+    <tr><td><kbd>ctrl+f</kbd></td><td>Filter processes</td></tr>
   </tbody>
 </table>
 

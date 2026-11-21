@@ -3,7 +3,7 @@
 
 use crate::core::config::keybinding::Keybindings;
 use crate::core::config::{Config, UiStyle};
-use crate::core::plugins::PluginManager;
+use crate::core::plugins::{PluginInfo, PluginManager};
 use crate::core::state::history::MetricsHistory;
 use crate::core::state::proc_history::ProcessCpuHistory;
 use crate::core::state::users::Users;
@@ -56,6 +56,8 @@ pub struct AppState {
     last_snapshot: Option<SystemSnapshot>,
     pub plugin_manager: Option<PluginManager>,
     pub plugin_widgets: Vec<PluginWidget>,
+    /// Plugin ids disabled by the user; persisted in `config.json`.
+    pub disabled_plugins: Vec<String>,
     /// Layout `options` of the widget currently being rendered (DR-UX1).
     ///
     /// The render engine sets this right before each pack-widget render call
@@ -126,6 +128,7 @@ impl AppState {
             last_snapshot: None,
             plugin_manager: None,
             plugin_widgets: Vec::new(),
+            disabled_plugins: config.disabled_plugins,
             active_widget_options: None,
         }
     }
@@ -151,6 +154,52 @@ impl AppState {
             // Only accept if the plugin has RenderWidgets capability
             self.plugin_widgets = registrations;
         }
+    }
+
+    /// Metadata for every registered plugin, enabled or not.
+    pub fn plugin_infos(&self) -> Vec<PluginInfo> {
+        self.plugin_manager
+            .as_ref()
+            .map(PluginManager::plugin_infos)
+            .unwrap_or_default()
+    }
+
+    /// Whether a registered plugin is currently enabled.
+    pub fn is_plugin_enabled(&self, id: &str) -> bool {
+        self.plugin_manager
+            .as_ref()
+            .and_then(|manager| manager.is_enabled(id))
+            .unwrap_or(false)
+    }
+
+    /// Enable or disable one plugin and refresh providers/widgets.
+    pub fn set_plugin_enabled(&mut self, id: &str, enabled: bool) -> anyhow::Result<bool> {
+        let Some(result) =
+            self.with_plugin_manager_mut(|manager, this| manager.set_enabled(id, enabled, this))
+        else {
+            anyhow::bail!("plugin manager is not initialized");
+        };
+        let changed = result.map_err(|error| anyhow::anyhow!("{error}"))?;
+        if changed {
+            if enabled {
+                self.disabled_plugins.retain(|plugin| plugin != id);
+            } else if !self.disabled_plugins.iter().any(|plugin| plugin == id) {
+                self.disabled_plugins.push(id.to_string());
+            }
+            self.refresh_plugin_providers();
+        }
+        Ok(changed)
+    }
+
+    /// Recollect the enabled plugins' data providers and widget registrations.
+    pub fn refresh_plugin_providers(&mut self) {
+        let extras = self
+            .plugin_manager
+            .as_ref()
+            .map(PluginManager::collect_data_providers)
+            .unwrap_or_default();
+        self.provider.add_extras(extras);
+        self.refresh_plugin_widgets();
     }
 
     /// Kill a process by PID. Returns true if the signal was sent.

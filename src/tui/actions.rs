@@ -15,7 +15,11 @@ impl AppState {
             Action::NextLayout => self.next_layout(),
             Action::ToggleFullscreen => self.toggle_fullscreen(),
             Action::CycleFullscreen => self.cycle_fullscreen_widget(),
-            Action::Search => self.start_search(),
+            Action::Search => {
+                self.close_palette();
+                self.start_search();
+                return;
+            }
             Action::OpenCommandPalette => {}
             Action::Cancel => {
                 if self.show_help {
@@ -41,6 +45,17 @@ impl AppState {
                 self.palette_navigate_to(PalettePage::Layouts);
                 return;
             }
+            Action::NavigatePlugins => {
+                self.palette_navigate_to(PalettePage::Plugins);
+                return;
+            }
+            Action::TogglePlugin(id) => {
+                let enabled = !self.is_plugin_enabled(id);
+                let _ = self.set_plugin_enabled(id, enabled);
+                self.rebuild_palette();
+                return;
+            }
+            Action::Noop => return,
             Action::KillProcess => {
                 if let Some(pid) = self.process_selected_pid {
                     self.kill_process_by_pid(pid);

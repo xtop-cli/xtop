@@ -90,7 +90,7 @@ fn render_search_overlay(f: &mut Frame, state: &AppState, area: Rect) {
     let fg = to_color(*state.current_theme.fg());
     let bg = to_color(*state.current_theme.bg());
     let accent = to_color(*state.current_theme.accent());
-    let search_text = format!("/{}_", state.search_query);
+    let search_text = format!("Filter: {}_", state.search_query);
     let overlay = Paragraph::new(search_text)
         .style(Style::default().fg(fg).bg(bg))
         .block(

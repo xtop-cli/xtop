@@ -88,6 +88,7 @@ pub enum PalettePage {
     Main,
     Themes,
     Layouts,
+    Plugins,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -103,9 +104,10 @@ pub struct PaletteState {
 impl PaletteState {
     pub fn title(&self) -> &str {
         match self.page {
-            PalettePage::Main => "Command Palette",
+            PalettePage::Main => "Command Bar",
             PalettePage::Themes => "Select Theme",
             PalettePage::Layouts => "Select Layout",
+            PalettePage::Plugins => "Plugins",
         }
     }
 }

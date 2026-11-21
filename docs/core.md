@@ -84,7 +84,7 @@ History buffers are bounded by the configured `history_points`, so memory
 stays flat during long sessions.
 
 The state module also exposes shared view-control types (input mode,
-fullscreen target, command palette state). TUI action dispatch and palette
+fullscreen target, command bar state). TUI action dispatch and palette
 behavior live in `src/tui`, not in `core`.
 
 ## Configuration

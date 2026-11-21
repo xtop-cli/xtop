@@ -51,8 +51,9 @@ pub(crate) fn handle_key(state: &mut AppState, key: KeyEvent) {
                 state.quit();
                 return;
             }
-            // Direct Ctrl+P check (works regardless of keybinding config, important on macOS)
-            if key_str == "ctrl+p" {
+            // Direct command-bar shortcuts work regardless of config and
+            // replace the old `/` process search.
+            if key_str == "ctrl+p" || key_str == "/" {
                 state.open_palette();
                 state.input_mode = InputMode::CommandPalette;
                 return;

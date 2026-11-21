@@ -19,5 +19,6 @@ pub fn save_config(state: &AppState) {
     cfg.update_interval_ms = state.update_interval_ms;
     cfg.alerts = state.alerts.clone();
     cfg.keybindings = state.keybindings.clone();
+    cfg.disabled_plugins = state.disabled_plugins.clone();
     let _ = config::save_config(&cfg);
 }

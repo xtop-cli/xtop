@@ -8,7 +8,7 @@
   <li><a href="#keybindings">Keybindings</a></li>
   <li><a href="#modules">Modules</a></li>
   <li><a href="#help-overlay">Help Overlay</a></li>
-  <li><a href="#command-palette">Command Palette</a></li>
+  <li><a href="#command-palette">Command Bar</a></li>
   <li><a href="#full-screen-mode">Full-Screen Mode</a></li>
   <li><a href="#responsive-layouts">Responsive Layouts</a></li>
   <li><a href="#command-line-commands">Command-Line Commands</a></li>
@@ -55,20 +55,24 @@
       <td>Cycle full-screen focus through all available widgets</td>
     </tr>
     <tr>
-      <td><kbd>/</kbd></td>
-      <td>Open process search / filter</td>
+      <td><kbd>/</kbd> / <kbd>ctrl+p</kbd></td>
+      <td>Open the command bar</td>
+    </tr>
+    <tr>
+      <td><kbd>ctrl+f</kbd></td>
+      <td>Filter processes</td>
     </tr>
     <tr>
       <td><kbd>Enter</kbd></td>
-      <td>Confirm search filter</td>
+      <td>Confirm filter / select command</td>
     </tr>
     <tr>
       <td><kbd>Backspace</kbd></td>
-      <td>Delete character in search input</td>
+      <td>Delete character / return to the previous page</td>
     </tr>
     <tr>
       <td><kbd>Esc</kbd></td>
-      <td>Cancel search / close help overlay</td>
+      <td>Cancel search / close command bar or help</td>
     </tr>
   </tbody>
 </table>
@@ -115,29 +119,32 @@
 
 <hr>
 
-<h2 id="process-search">Process Search</h2>
+<h2 id="process-search">Process Filter</h2>
 
-<p>Search filters the process list in real time:</p>
+<p>Filtering narrows the process list in real time:</p>
 
 <ul>
-  <li>Press <kbd>/</kbd> to open the search bar at the top of the process list.</li>
+  <li>Press <kbd>ctrl+f</kbd> to enter the filter, or open the command bar with <kbd>/</kbd> / <kbd>ctrl+p</kbd> and choose <strong>Processes (filter) →</strong>.</li>
   <li>Type any query -- results filter instantly by process name.</li>
   <li>Press <kbd>Enter</kbd> to confirm the filter, <kbd>Esc</kbd> to cancel, <kbd>Backspace</kbd> to delete characters.</li>
-  <li>A centered overlay with a <code>/query_</code> indicator shows the current search input.</li>
+  <li>A centered overlay shows the current <code>Filter: query_</code> input.</li>
 </ul>
 
 <hr>
 
-<h2 id="command-palette">Command Palette</h2>
+<h2 id="command-palette">Command Bar</h2>
 
-<p>Press <kbd>ctrl+p</kbd> to open the command palette, a searchable list of
-actions (also reachable with the <code>command_palette</code> keybinding).
-The palette has three pages: <strong>Main</strong> (go to themes/layouts,
-toggle or cycle full-screen, search, help, cycle the process sort, random
-theme, exit), <strong>Themes</strong> (jump to any loaded theme) and
-<strong>Layouts</strong> (jump to any layout). Type to filter, use
-<kbd>up</kbd>/<kbd>down</kbd> to move, <kbd>Enter</kbd> to run the selected
-action and <kbd>Esc</kbd> to close.</p>
+<p>Press <kbd>/</kbd> or <kbd>ctrl+p</kbd> to open the command bar. It is a
+searchable, layered list of actions and pages: <strong>Main</strong>
+(themes/layouts/plugins/processes, full-screen, help, sort, random theme,
+exit), <strong>Themes</strong>, <strong>Layouts</strong> and
+<strong>Plugins</strong>. The Processes entry enters the interactive process
+filter. The Plugins page toggles each compiled plugin on or off with
+<kbd>Enter</kbd>; the choice is persisted in <code>config.json</code>.</p>
+
+<p>Type to filter the current page, use <kbd>up</kbd>/<kbd>down</kbd> to
+move, <kbd>Enter</kbd> to run or select, <kbd>Backspace</kbd> on an empty
+filter to return to the main page, and <kbd>Esc</kbd> to close.</p>
 
 <hr>
 

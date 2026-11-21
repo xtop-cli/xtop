@@ -88,6 +88,12 @@ metadata.</p>
       <td>absent</td>
       <td>Frame effect applied to every rendered frame: <code>"fade"</code> activates the built-in fade-in (only in builds compiled with the <code>effects</code> feature). Any other value disables effects.</td>
     </tr>
+    <tr>
+      <td><code>disabled_plugins</code></td>
+      <td>array</td>
+      <td><code>[]</code></td>
+      <td>Plugin ids disabled from the command bar; restored on startup.</td>
+    </tr>
   </tbody>
 </table>
 
@@ -112,8 +118,8 @@ metadata.</p>
     "next_layout": ["l"],
     "toggle_fullscreen": ["f"],
     "cycle_fullscreen": ["F"],
-    "search": ["/"],
-    "command_palette": ["ctrl+p", "ctrl+P"],
+    "search": ["ctrl+f"],
+    "command_palette": ["ctrl+p", "ctrl+P", "/"],
     "cancel": ["escape"],
     "kill_process": ["k"],
     "process_up": ["up"],
@@ -125,11 +131,14 @@ metadata.</p>
     "borders": "native",
     "pack": null,
     "widgets": {}
-  }
+  },
+  "disabled_plugins": []
 }</code></pre>
 
 <p>Unknown keys and missing optional keys are ignored; a file that cannot be
-parsed falls back to the defaults above.</p>
+parsed falls back to the defaults above. Existing configs that bind `/` to
+`search` are migrated in memory to `command_palette` on load; the next save
+persists the new binding.</p>
 
 <hr>
 
@@ -194,8 +203,8 @@ shifted characters (<code>"T"</code>, <code>"F"</code>), modified keys
     <tr><td><code>next_layout</code></td><td><code>["l"]</code></td><td>Next layout</td></tr>
     <tr><td><code>toggle_fullscreen</code></td><td><code>["f"]</code></td><td>Toggle full-screen view</td></tr>
     <tr><td><code>cycle_fullscreen</code></td><td><code>["F"]</code></td><td>Cycle the full-screen widget</td></tr>
-    <tr><td><code>search</code></td><td><code>["/"]</code></td><td>Start process search</td></tr>
-    <tr><td><code>command_palette</code></td><td><code>["ctrl+p", "ctrl+P"]</code></td><td>Open the command palette (ctrl+p also works as a hardcoded fallback)</td></tr>
+    <tr><td><code>search</code></td><td><code>["ctrl+f"]</code></td><td>Start process filtering</td></tr>
+    <tr><td><code>command_palette</code></td><td><code>["ctrl+p", "ctrl+P", "/"]</code></td><td>Open the command bar (ctrl+p and / also work as hardcoded fallbacks)</td></tr>
     <tr><td><code>cancel</code></td><td><code>["escape"]</code></td><td>Cancel search / close overlays</td></tr>
     <tr><td><code>kill_process</code></td><td><code>["k"]</code></td><td>Kill the selected process (same-user safety check)</td></tr>
     <tr><td><code>process_up</code></td><td><code>["up"]</code></td><td>Move the process selection up</td></tr>

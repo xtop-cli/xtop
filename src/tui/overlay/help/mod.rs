@@ -46,8 +46,8 @@ pub fn render(f: &mut Frame, state: &AppState, area: Rect) {
     );
     push_key(&mut text, "Cycle fullscreen", &kb.cycle_fullscreen, accent);
     text.push(Line::from(""));
-    push_key(&mut text, "Search processes", &kb.search, accent);
-    push_key(&mut text, "Command palette", &kb.command_palette, accent);
+    push_key(&mut text, "Filter processes", &kb.search, accent);
+    push_key(&mut text, "Command bar", &kb.command_palette, accent);
     push_key(&mut text, "Cancel", &kb.cancel, accent);
     text.push(Line::from(""));
     push_key(&mut text, "Kill process", &kb.kill_process, accent);

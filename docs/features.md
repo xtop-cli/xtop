@@ -61,6 +61,7 @@
 <ul>
   <li>Scrolling list of running processes sorted by CPU usage.</li>
   <li>Live search filtering by process name.</li>
+  <li>Command bar (<code>/</code> or <code>ctrl+p</code>) with Themes, Layouts, Plugins and Processes pages; plugins can be enabled/disabled and the choice is persisted.</li>
   <li>Displays process name, CPU usage, and memory usage.</li>
 </ul>
 

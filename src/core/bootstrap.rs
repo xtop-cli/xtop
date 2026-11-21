@@ -122,5 +122,10 @@ pub fn initialize_state(cfg_dir: &Path) -> anyhow::Result<AppState> {
     let extra_providers = plugin_mgr.collect_data_providers();
     state.init_plugins(plugin_mgr, extra_providers);
 
+    let disabled = state.disabled_plugins.clone();
+    for id in disabled {
+        let _ = state.set_plugin_enabled(&id, false);
+    }
+
     Ok(state)
 }
