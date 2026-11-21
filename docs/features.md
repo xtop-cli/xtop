@@ -7,7 +7,8 @@
 <h2 id="headless-cli">Headless CLI</h2>
 
 <ul>
-  <li><code>xtop status</code> prints a one-shot system snapshot; <code>--json</code> emits a stable schema.</li>
+  <li><code>xtop status</code> prints a one-shot system snapshot, including disk I/O; <code>--json</code> emits a stable schema.</li>
+  <li><code>xtop status &lt;section&gt;</code> gives a quick focused answer: <code>cpu</code>, <code>memory</code>/<code>ram</code>, <code>swap</code>, <code>load</code>, <code>uptime</code>, <code>disks</code>, <code>disk-io</code>, <code>network</code>, <code>battery</code> or <code>gpu</code>.</li>
   <li><code>xtop processes</code> prints a sortable, filterable process list with optional JSON output.</li>
   <li><code>xtop watch</code> repeats the snapshot at a configurable interval and can emit JSON Lines.</li>
   <li><code>xtop info</code> and <code>xtop doctor</code> report build features, paths, assets and local prerequisites without starting the TUI.</li>

@@ -13,11 +13,20 @@ use super::input::handle_key;
 use super::screen;
 use super::terminal;
 
-/// Run the interactive TUI loop.
+/// Run the interactive TUI loop, restoring the terminal on every outcome.
 pub fn run() -> anyhow::Result<()> {
     terminal::install_panic_hook();
     let mut terminal = terminal::init()?;
+    let result = run_session(&mut terminal);
+    let restored = terminal::restore();
+    match (result, restored) {
+        (Err(error), _) => Err(error),
+        (Ok(()), Err(error)) => Err(error.into()),
+        (Ok(()), Ok(())) => Ok(()),
+    }
+}
 
+fn run_session(terminal: &mut terminal::Tui) -> anyhow::Result<()> {
     let cfg_dir = config_dir();
     let mut state = initialize_state(&cfg_dir)?;
 
@@ -92,12 +101,11 @@ pub fn run() -> anyhow::Result<()> {
         }
     }
 
-    // Disable plugins on shutdown
+    // Disable plugins on shutdown.
     let _ = state.with_plugin_manager_mut(|mgr, this| {
         mgr.disable_all(this);
     });
 
-    terminal::restore()?;
     Ok(())
 }
 

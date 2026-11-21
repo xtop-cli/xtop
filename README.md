@@ -52,7 +52,7 @@
   <li>Persistent configuration</li>
   <li>Runtime widgets: sandboxed WASM modules or helper processes (Lua, Python, ...) via the opt-in <code>plugin-wasm</code> / <code>plugin-external</code> features</li>
   <li>Self-update through the detected installation medium: <code>xtop update</code></li>
-  <li>Headless CLI monitoring: <code>status</code>, <code>processes</code>, <code>watch</code>, <code>info</code> and <code>doctor</code> with JSON output</li>
+  <li>Headless CLI monitoring: <code>status</code> (full or per-section), <code>processes</code>, <code>watch</code>, <code>info</code> and <code>doctor</code> with JSON output</li>
   <li>Theme and layout management from the CLI (<code>xtop theme</code>, <code>xtop layout</code>, <code>--change-theme</code>, <code>--gen-config</code>), followed live by running instances</li>
 </ul>
 
@@ -123,7 +123,7 @@
 
 <pre><code>irm https://raw.githubusercontent.com/xtop-cli/xtop/main/install-prebuilt.ps1 | iex</code></pre>
 
-<p>Pin a version with <code>--version 0.1.1</code> (or <code>-Version 0.1.1</code> on Windows). The installers verify the release <code>SHA256SUMS</code> and, when cosign is available, the keyless signature. See <a href="docs/installation.md">docs/installation.md</a> for prefixes and verification flags.</p>
+<p>Pin a published version with <code>--version 0.1.0</code> (or <code>-Version 0.1.0</code> on Windows). The installers verify the release <code>SHA256SUMS</code> and, when cosign is available, the keyless signature. See <a href="docs/installation.md">docs/installation.md</a> for prefixes and verification flags.</p>
 
 <h3>From source</h3>
 

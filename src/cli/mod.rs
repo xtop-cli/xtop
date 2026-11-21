@@ -10,8 +10,9 @@ pub(crate) mod help;
 
 use crate::core::assets::ensure_default_assets;
 
-/// Run the CLI. No arguments (or an unrecognized first argument) starts the
-/// TUI, preserving the original `xtop` entry behavior.
+/// Run the CLI. No arguments (or an unrecognized positional command) starts
+/// the TUI; unknown flags are usage errors instead of accidentally opening
+/// the interactive app.
 pub fn run() -> anyhow::Result<()> {
     reset_sigpipe();
     let args: Vec<String> = std::env::args().collect();
@@ -96,6 +97,9 @@ pub fn run() -> anyhow::Result<()> {
             "--help" | "-h" => {
                 help::show(help::GLOBAL);
                 return Ok(());
+            }
+            other if other.starts_with('-') => {
+                help::usage_error(help::GLOBAL, &format!("unknown option '{other}'"));
             }
             _ => {}
         }

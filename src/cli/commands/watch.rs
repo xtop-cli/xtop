@@ -60,7 +60,7 @@ pub(crate) fn watch_command(args: &[String]) -> anyhow::Result<()> {
                 println!();
             }
             println!("sample {sample}");
-            monitor::print_status(&snapshot, &info);
+            super::status::print_status(&snapshot, &info);
         }
         if count > 0 && sample >= count {
             break;

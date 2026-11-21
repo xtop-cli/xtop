@@ -13,18 +13,35 @@ Options:
   -h, --help    Show this help and exit";
 
 pub(crate) const STATUS: &str = "\
-xtop status - one-shot system snapshot
+xtop status - print a snapshot or one section
 
 Usage:
-  xtop status [--json]
+  xtop status [section] [--json]
 
-Samples CPU, memory, swap, load, uptime, disks, network, batteries and GPUs.
-The command samples twice with a short pause so CPU and rate values are
-meaningful on the first output.
+Sections:
+  summary    Complete snapshot (default)
+  host       Hostname, OS, kernel, desktop, shell and CPU model
+  cpu        Aggregate CPU usage/temperature and per-core details
+  memory     RAM total, used, available, free and percentage
+  swap       Swap total, used, free and percentage
+  load       One, five and fifteen minute load averages
+  uptime     System uptime
+  disks      Mount points, filesystems and space
+  disk-io    Per-device read/write totals and rates
+  network    Interfaces with current RX/TX rates
+  battery    Batteries with charge percentage and state
+  gpu        GPUs with usage, temperature and memory
+
+Aliases: mem/ram for memory, disk_io/io for disk-io, net for network,
+         batteries for battery, gpus for gpu, all for summary.
 
 Options:
   --json        Print a machine-readable JSON object
-  -h, --help    Show this help and exit";
+  -h, --help    Show this help and exit
+
+Without a section, xtop status prints the complete snapshot. Use
+'xtop status <section> --help' for one section and 'xtop processes --help'
+for the process list.";
 
 pub(crate) const PROCESSES: &str = "\
 xtop processes - one-shot process list

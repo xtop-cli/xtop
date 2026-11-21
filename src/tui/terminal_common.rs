@@ -10,20 +10,38 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
-use std::io::{self, Stdout};
+use std::io::{self, IsTerminal, Stdout};
 use std::panic;
 
 pub(crate) type Tui = Terminal<CrosstermBackend<Stdout>>;
 
 /// Enter the alternate screen, capture mouse/paste and enable raw mode.
+///
+/// The TUI is interactive by definition. Checking the TTYs before emitting
+/// escape sequences keeps a piped or redirected invocation from printing raw
+/// `?1049h`/mouse sequences to a non-terminal stream. Any failure after the
+/// alternate screen is entered is rolled back before returning.
 pub(crate) fn enter() -> io::Result<()> {
-    execute!(
+    if !io::stdin().is_terminal() || !io::stdout().is_terminal() {
+        return Err(io::Error::new(
+            io::ErrorKind::NotConnected,
+            "xtop: interactive TUI requires a terminal (stdin and stdout must be TTYs)",
+        ));
+    }
+    if let Err(error) = execute!(
         io::stdout(),
         EnterAlternateScreen,
         EnableMouseCapture,
         EnableBracketedPaste
-    )?;
-    enable_raw_mode()
+    ) {
+        let _ = leave();
+        return Err(error);
+    }
+    if let Err(error) = enable_raw_mode() {
+        let _ = leave();
+        return Err(error);
+    }
+    Ok(())
 }
 
 /// Restore the terminal to its pre-TUI state.
