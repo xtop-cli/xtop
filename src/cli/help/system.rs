@@ -34,7 +34,7 @@ Usage:
 
 Options:
   --json              Print a machine-readable JSON object
-  --sort <column>     cpu (default), memory, pid or name
+  --sort <column>     cpu (default), memory (mem), pid or name
   --asc               Sort ascending
   --desc              Sort descending (default)
   --limit <n>         Maximum rows; 0 means all (default 20)
@@ -85,7 +85,7 @@ pub(crate) const COMPLETIONS: &str = "\
 xtop completions - print shell completions
 
 Usage:
-  xtop completions <bash|zsh|fish|powershell>
+  xtop completions <bash|zsh|fish|powershell|pwsh>
 
 Writes the completion script to stdout.
 
@@ -107,7 +107,7 @@ Detects the installation medium and uses the same one:
 Options:
   --check              Print the installed/latest versions and the command
   --dry-run            Detect the medium and print the command without running
-  --method <method>    Force auto, xpm, pacman, cargo or binary
+  --method <method>    Force auto, xpm, pacman, cargo, binary (bin)
   --yes, -y            Non-interactive package-manager confirmation and sudo -n
   --force              Reinstall or force a cargo update
   --all-features       Use --all-features for a cargo installation

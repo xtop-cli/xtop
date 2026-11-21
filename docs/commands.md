@@ -30,6 +30,9 @@ xtop --help
 
 Running `xtop` with no arguments starts the TUI. An unrecognized first
 argument also starts the TUI; this preserves the original entry behavior.
+There are no per-metric top-level flags such as `--cpu`, `--ram` or
+`--disk`; unknown top-level flags fall through to the TUI as well. Use `xtop status`,
+`xtop processes` and `xtop watch` for metric state.
 
 ### Global options
 
@@ -88,6 +91,9 @@ argument also starts the TUI; this preserves the original entry behavior.
 | `xtop widget install <name\|url\|path>` | Add a widget pack as an optional dependency and feature. |
 | `xtop widget scaffold <name>` | Create a single-widget pack template under `widgets-dev/`. |
 
+Group aliases: `xtop themes` is `xtop theme`, `xtop layouts` is
+`xtop layout`, and `xtop addons` is `xtop addon`.
+
 ## TUI
 
 ```
@@ -118,14 +124,15 @@ and rate values are meaningful in the first output.
 ### `xtop processes`
 
 ```
-xtop processes [--json] [--sort cpu|memory|pid|name] [--asc|--desc]
+xtop processes [--json] [--sort cpu|memory|mem|pid|name] [--asc|--desc]
                [--limit N] [--filter TEXT]
 ```
 
 Prints a process table. CPU and memory are sampled over a short interval.
 The default sort is CPU descending and the default limit is 20; `--limit 0`
 prints every process in the snapshot. `--filter` matches process names.
-`--json` omits the process environment and full argv.
+`mem` is accepted as an alias for `memory`. `--json` omits the process
+environment and full argv.
 
 ### `xtop watch`
 
@@ -137,6 +144,48 @@ Repeats the status snapshot. The default interval is 1000 ms; values below
 100 ms are clamped. Without `--count`, the command runs until it is
 interrupted. `--jsonl` (and `--json`) prints one compact JSON object per
 sample.
+
+## Current state inspection
+
+`xtop status` is the one-shot view of the current host state. It prints CPU,
+memory (RAM), swap, load, uptime, disks, network interfaces, batteries and
+GPUs. Use `--json` for the complete snapshot, including disk I/O:
+
+```sh
+xtop status
+xtop status --json
+```
+
+The JSON object uses schema version 1 and the keys `host`, `cpu` (aggregate
+plus per-core data), `memory`, `swap`, `load`, `uptime_seconds`, `disks`,
+`disk_io`, `networks`, `batteries` and `gpus`. RAM is the `memory` key;
+there is no separate `xtop --ram` flag.
+
+Use the process, monitoring and configuration commands for the rest of the
+state:
+
+| Command | Current state reported |
+| --- | --- |
+| `xtop status [--json]` | Host snapshot: CPU, RAM, swap, load, uptime, disks, disk I/O (JSON), network, battery, GPU. |
+| `xtop processes [--json]` | Process table; JSON includes `pid`, `name`, `cpu_percent`, `memory_bytes`, `user_id`, `state`, `cmd`, `exe_path`, `parent_pid`, `start_time_epoch`, `run_time_seconds`, `thread_count`, `open_files` and `session_id`. |
+| `xtop watch [--jsonl]` | Repeated snapshots for live monitoring or streaming into another tool. |
+| `xtop info [--json]` | Build, enabled features, config/asset paths, local asset counts and tool availability. |
+| `xtop doctor [--json]` | Installation diagnostics: directory writability, config/manifest parsing, base assets, catalog and external tools. |
+| `xtop config list` | Effective persisted configuration. |
+| `xtop config path` | Config, themes, layouts and installed-assets paths. |
+| `xtop theme current` / `xtop layout current` | Active theme and layout. |
+| `xtop addon list` / `xtop plugin list` / `xtop widget list` | Installed assets, compiled plugins and widget packs. |
+
+For scripting, combine the JSON output with your JSON tool of choice:
+
+```sh
+xtop status --json
+xtop processes --json --sort memory --limit 10
+xtop watch --jsonl --count 1
+```
+
+See [core.md](core.md) for the snapshot model, providers and platform
+coverage behind these commands.
 
 ## Diagnostics
 
@@ -162,11 +211,12 @@ Warnings do not fail; failed checks exit with status 1.
 ## Shell completions
 
 ```
-xtop completions <bash|zsh|fish|powershell>
+xtop completions <bash|zsh|fish|powershell|pwsh>
 ```
 
-Prints a completion script to stdout. Source it from the shell startup file
-or install it in the shell's completion directory.
+Prints a completion script to stdout. `pwsh` is an alias for `powershell`.
+Source the script from the shell startup file or install it in the shell's
+completion directory.
 
 ## MCP server
 
@@ -469,7 +519,7 @@ Options:
 | --- | --- |
 | `--check` | Print installed/latest versions and whether an update exists. |
 | `--dry-run` | Detect the medium and print the command without running it. |
-| `--method <auto\|xpm\|pacman\|cargo\|binary>` | Override detection. |
+| `--method <auto\|xpm\|pacman\|cargo\|binary\|bin>` | Override detection. `bin` is an alias for `binary`. |
 | `--yes`, `-y` | Non-interactive package-manager confirmation and `sudo -n`. |
 | `--force` | Reinstall or force a cargo update. |
 | `--all-features` | Cargo only: rebuild with every feature. |
@@ -503,8 +553,8 @@ xtop addon path
 entry carries its version, author and license, and downloads are verified
 against the catalog SHA-256.
 
-The plural group names `xtop themes` and `xtop layouts` are aliases for
-`xtop theme` and `xtop layout`.
+The plural group names `xtop themes`, `xtop layouts` and `xtop addons` are
+aliases for `xtop theme`, `xtop layout` and `xtop addon`.
 
 Plugins and widget packs are not runtime addons: `xtop plugin` and
 `xtop widget` edit the kernel source and rebuild it. They are documented

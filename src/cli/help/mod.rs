@@ -49,6 +49,7 @@ Commands:
   layout show <layout>                    Show an installed layout
   layout set <layout>                     Persist the active layout
   layout download <layout|--all>          Install layouts from the catalog
+  layout install <layout|--all>           Alias for layout download
   layout check <file>                     Validate a layout JSONC/JSON file
   layout path                             Print the layouts directory
   config download <name|--all>            Install a theme or layout from the catalog
