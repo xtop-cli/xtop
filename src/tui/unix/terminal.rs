@@ -10,11 +10,15 @@ use std::io;
 use crate::tui::terminal_common as common;
 
 pub(crate) fn init() -> io::Result<common::Tui> {
-    // Build the terminal before touching the screen: a construction failure
-    // must not leave the user in the alternate screen.
-    let terminal = common::terminal()?;
+    // `enter` validates the TTYs before emitting any escape sequence.
     common::enter()?;
-    Ok(terminal)
+    match common::terminal() {
+        Ok(terminal) => Ok(terminal),
+        Err(error) => {
+            let _ = common::leave();
+            Err(error)
+        }
+    }
 }
 
 pub(crate) fn restore() -> io::Result<()> {
