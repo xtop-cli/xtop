@@ -20,7 +20,7 @@ pub const DEFAULT_CATALOG_URL: &str =
 /// Release-branch fallback used before the catalog is merged into `main`.
 /// The refs/heads spelling keeps branch names containing slashes unambiguous.
 const RELEASE_CATALOG_URL: &str =
-    "https://raw.githubusercontent.com/xtop-cli/xtop/refs/heads/release/v0.1.1/catalog.json";
+    "https://raw.githubusercontent.com/xtop-cli/xtop/refs/heads/release/v0.1.1/catalog.json?xtop=release-v0.1.1";
 
 /// Where `xtop config download` looks for the catalog. Override with
 /// `XTOP_CATALOG_URL` for local testing or a mirror.
