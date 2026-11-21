@@ -5,6 +5,7 @@
 //! here is headless or source-management tooling.
 
 mod commands;
+mod dev;
 pub(crate) mod help;
 
 use crate::core::assets::ensure_default_assets;
@@ -12,6 +13,7 @@ use crate::core::assets::ensure_default_assets;
 /// Run the CLI. No arguments (or an unrecognized first argument) starts the
 /// TUI, preserving the original `xtop` entry behavior.
 pub fn run() -> anyhow::Result<()> {
+    reset_sigpipe();
     let args: Vec<String> = std::env::args().collect();
 
     if args.len() > 1 {
@@ -28,10 +30,28 @@ pub fn run() -> anyhow::Result<()> {
                 return commands::mcp::run_mcp_server();
             }
             "plugin" => {
-                return commands::plugins::plugin_command(&args);
+                return dev::plugins::plugin_command(&args);
             }
             "widget" => {
-                return commands::widget::widget_command(&args);
+                return dev::widget::widget_command(&args);
+            }
+            "status" => {
+                return commands::status::status_command(&args);
+            }
+            "processes" => {
+                return commands::processes::processes_command(&args);
+            }
+            "watch" => {
+                return commands::watch::watch_command(&args);
+            }
+            "info" => {
+                return commands::system::info_command(&args);
+            }
+            "doctor" => {
+                return commands::system::doctor_command(&args);
+            }
+            "completions" => {
+                return commands::completions::completions_command(&args);
             }
             "theme" => {
                 return commands::theme::theme_command(&args);
@@ -63,6 +83,10 @@ pub fn run() -> anyhow::Result<()> {
                 }
                 return commands::config::generate_base_config();
             }
+            "--version" | "-V" => {
+                println!("xtop {}", env!("CARGO_PKG_VERSION"));
+                return Ok(());
+            }
             "--help" | "-h" => {
                 help::show(help::GLOBAL);
                 return Ok(());
@@ -74,3 +98,15 @@ pub fn run() -> anyhow::Result<()> {
     ensure_default_assets();
     commands::tui::run_tui()
 }
+
+#[cfg(unix)]
+fn reset_sigpipe() {
+    // Restore the default SIGPIPE behavior so `xtop status | head` exits
+    // quietly instead of panicking on a closed stdout.
+    unsafe {
+        libc::signal(libc::SIGPIPE, libc::SIG_DFL);
+    }
+}
+
+#[cfg(not(unix))]
+fn reset_sigpipe() {}

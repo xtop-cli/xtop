@@ -56,6 +56,9 @@ effects = ["dep:xtop-effect-fade", "dep:xtop-effect-api"]
 plugin-wasm = ["dep:xtop-plugin-wasm"]
 plugin-external = ["dep:xtop-plugin-external"]
 
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
 [target.'cfg(windows)'.dependencies]
 # Windows probes under src/core/providers/sysinfo/platform/windows.rs (thin FFI,
 # mirroring the raw extern "C" style of the unix probes).

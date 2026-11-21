@@ -185,6 +185,10 @@ A headless consumer can reuse the same path:
 let state = xtop::core::bootstrap::initialize_state(&config_dir)?;
 ```
 
+The CLI's `status`, `processes`, `watch` and `doctor` commands consume the
+core directly without creating a terminal or starting a TUI. They use the
+same providers, config paths and asset metadata as the interactive app.
+
 ## Data flow
 
 1. The CLI parses arguments or starts the TUI.

@@ -4,11 +4,15 @@
 //! frontend. Shared assembly and asset helpers live in `core::bootstrap` and
 //! `core::assets`.
 
+pub mod completions;
 pub mod config;
 mod download;
 pub mod layout;
 pub mod mcp;
-pub mod plugins;
+mod monitor;
+pub mod processes;
+pub mod status;
+pub mod system;
 pub mod theme;
 pub mod tui;
-pub mod widget;
+pub mod watch;

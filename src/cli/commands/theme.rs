@@ -45,6 +45,16 @@ pub fn theme_command(args: &[String]) -> anyhow::Result<()> {
             println!("{}", config::load_config().theme);
             Ok(())
         }
+        "show" => {
+            if help::wants_help(&args[3..]) {
+                help::show(help::THEME_SHOW);
+                return Ok(());
+            }
+            let Some(name) = args.get(3) else {
+                help::usage_error(help::THEME_SHOW, "Usage: xtop theme show <theme>");
+            };
+            cmd_show(name)
+        }
         "set" => {
             if help::wants_help(&args[3..]) {
                 help::show(help::THEME_SET);
@@ -177,6 +187,51 @@ fn cmd_available() -> anyhow::Result<()> {
         );
     }
     Ok(())
+}
+
+fn cmd_show(name: &str) -> anyhow::Result<()> {
+    let themes = load_all_themes();
+    let Some(theme) = themes.iter().find(|theme| theme.name == name) else {
+        anyhow::bail!("unknown theme '{name}'; install it with 'xtop theme download {name}'");
+    };
+    let installed = installed_asset(AssetKind::Theme, &theme.name);
+    let source = if theme.name == BASE_THEME_NAME {
+        "base"
+    } else if installed.is_some() {
+        "downloaded"
+    } else {
+        "user"
+    };
+    println!("name: {}", theme.name);
+    println!("source: {source}");
+    let path = theme_file(&theme.name);
+    if let Some(path) = &path {
+        println!("path: {}", path.display());
+    }
+    if let Some(installed) = installed {
+        println!(
+            "version: {}  author: {}  license: {}",
+            installed.version, installed.author, installed.license
+        );
+    }
+    println!();
+    println!(
+        "{}",
+        serde_json::to_string_pretty(theme)
+            .map_err(|error| anyhow::anyhow!("failed to encode theme: {error}"))?
+    );
+    Ok(())
+}
+
+fn theme_file(name: &str) -> Option<std::path::PathBuf> {
+    let dir = assets::themes_dir();
+    for extension in ["jsonc", "json"] {
+        let path = dir.join(format!("{name}.{extension}"));
+        if path.is_file() {
+            return Some(path);
+        }
+    }
+    None
 }
 
 #[cfg(test)]

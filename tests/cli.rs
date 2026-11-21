@@ -19,6 +19,12 @@ fn global_help_lists_every_command_on_stdout() {
     let stdout = String::from_utf8_lossy(&out.stdout);
     assert!(stdout.starts_with("xtop - cross-platform TUI system monitor"));
     for command in [
+        "status",
+        "processes",
+        "watch",
+        "info",
+        "doctor",
+        "completions",
         "mcp",
         "theme list",
         "theme download",
@@ -31,6 +37,7 @@ fn global_help_lists_every_command_on_stdout() {
         "widget install",
         "--change-theme <theme>",
         "--gen-config",
+        "--version",
         "-h, --help",
     ] {
         assert!(stdout.contains(command), "missing help entry: {command}");
@@ -54,7 +61,10 @@ fn group_help_is_scoped_to_the_group() {
 
     let config = help(&["config", "--help"]);
     assert!(config.status.success());
-    assert!(String::from_utf8_lossy(&config.stdout).contains("download <name|--all>"));
+    let config = String::from_utf8_lossy(&config.stdout);
+    assert!(config.contains("download <name|--all>"));
+    assert!(config.contains("get <key.path>"));
+    assert!(config.contains("set <key.path> <value>"));
 
     let plugin = help(&["plugin", "--help"]);
     assert!(plugin.status.success());
@@ -82,6 +92,25 @@ fn subcommand_help_lists_its_own_arguments() {
             vec!["config", "download", "--help"],
             "xtop config download <name>",
         ),
+        (
+            vec!["config", "get", "--help"],
+            "xtop config get <key.path>",
+        ),
+        (
+            vec!["config", "set", "--help"],
+            "xtop config set <key.path> <value>",
+        ),
+        (vec!["theme", "show", "--help"], "xtop theme show <theme>"),
+        (
+            vec!["layout", "show", "--help"],
+            "xtop layout show <layout>",
+        ),
+        (vec!["status", "--help"], "xtop status"),
+        (vec!["processes", "--help"], "xtop processes"),
+        (vec!["watch", "--help"], "xtop watch"),
+        (vec!["info", "--help"], "xtop info"),
+        (vec!["doctor", "--help"], "xtop doctor"),
+        (vec!["completions", "--help"], "xtop completions"),
         (
             vec!["plugin", "install", "--help"],
             "xtop plugin install <name|url>",
@@ -121,6 +150,8 @@ fn usage_errors_exit_with_status_two() {
         vec!["config", "download"],
         vec!["--change-theme"],
         vec!["--gen-config", "extra"],
+        vec!["status", "--bogus"],
+        vec!["completions", "unknown"],
     ] {
         let out = xtop().args(&args).output().expect("run usage error");
         assert_eq!(
@@ -289,6 +320,166 @@ fn config_download_installs_theme_from_a_local_catalog() {
     assert!(config.contains("\"layout_name\": \"Test Layout\""));
 
     let _ = fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn version_prints_the_package_version() {
+    let out = xtop().arg("--version").output().expect("run --version");
+    assert!(out.status.success());
+    assert_eq!(
+        String::from_utf8_lossy(&out.stdout).trim(),
+        format!("xtop {}", env!("CARGO_PKG_VERSION"))
+    );
+}
+
+#[test]
+fn status_and_processes_produce_json_and_human_output() {
+    let status = xtop()
+        .args(["status", "--json"])
+        .output()
+        .expect("run status");
+    assert!(status.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&status.stdout).expect("status JSON");
+    assert_eq!(value["schema"], 1);
+    assert_eq!(value["kind"], "status");
+    assert!(value["host"].is_object());
+    assert!(value["cpu"].is_object());
+    assert!(value["memory"].is_object());
+
+    let processes = xtop()
+        .args([
+            "processes",
+            "--json",
+            "--limit",
+            "3",
+            "--sort",
+            "pid",
+            "--asc",
+        ])
+        .output()
+        .expect("run processes");
+    assert!(processes.status.success());
+    let value: serde_json::Value =
+        serde_json::from_slice(&processes.stdout).expect("processes JSON");
+    assert_eq!(value["kind"], "processes");
+    let list = value["processes"].as_array().expect("process array");
+    assert!(list.len() <= 3);
+    if let Some(process) = list.first() {
+        assert!(process.get("environ").is_none());
+        assert!(process.get("pid").is_some());
+    }
+
+    let human = xtop()
+        .args(["processes", "--limit", "1"])
+        .output()
+        .expect("run human processes");
+    assert!(human.status.success());
+    assert!(String::from_utf8_lossy(&human.stdout).contains("PID"));
+}
+
+#[test]
+fn watch_can_emit_one_json_sample() {
+    let out = xtop()
+        .args(["watch", "--count", "1", "--jsonl"])
+        .output()
+        .expect("run watch");
+    assert!(out.status.success());
+    let line = String::from_utf8_lossy(&out.stdout);
+    let value: serde_json::Value = serde_json::from_str(line.trim()).expect("watch JSONL");
+    assert_eq!(value["kind"], "status");
+}
+
+#[test]
+fn info_and_doctor_report_the_local_installation() {
+    let dir = std::env::temp_dir().join(format!("xtop-info-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&dir);
+    let info = xtop()
+        .env("XDG_CONFIG_HOME", &dir)
+        .args(["info", "--json"])
+        .output()
+        .expect("run info");
+    assert!(info.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&info.stdout).expect("info JSON");
+    assert_eq!(value["version"], env!("CARGO_PKG_VERSION"));
+    assert!(value["paths"].is_object());
+    assert!(value["features"].is_array());
+
+    let doctor = xtop()
+        .env("XDG_CONFIG_HOME", &dir)
+        .args(["doctor", "--json"])
+        .output()
+        .expect("run doctor");
+    assert!(doctor.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&doctor.stdout).expect("doctor JSON");
+    assert_eq!(value["ok"], true);
+    assert!(value["checks"].is_array());
+    let _ = fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn config_get_set_list_and_reset_work() {
+    let dir = std::env::temp_dir().join(format!("xtop-config-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&dir);
+    let run = |args: &[&str]| {
+        xtop()
+            .env("XDG_CONFIG_HOME", &dir)
+            .args(args)
+            .output()
+            .expect("run config command")
+    };
+    assert!(run(&["config", "set", "theme", "x"]).status.success());
+    assert!(run(&["config", "set", "alerts.cpu_high", "80"])
+        .status
+        .success());
+    let get = run(&["config", "get", "alerts.cpu_high"]);
+    assert!(get.status.success());
+    assert_eq!(String::from_utf8_lossy(&get.stdout).trim(), "80.0");
+    let list = run(&["config", "list"]);
+    assert!(list.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&list.stdout).expect("config JSON");
+    assert_eq!(value["theme"], "x");
+    assert_eq!(value["alerts"]["cpu_high"], 80.0);
+    let reset = run(&["config", "reset", "--yes"]);
+    assert!(reset.status.success());
+    let get = run(&["config", "get", "alerts.cpu_high"]);
+    assert_eq!(String::from_utf8_lossy(&get.stdout).trim(), "90.0");
+    let _ = fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn theme_and_layout_show_print_the_installed_model() {
+    let theme = xtop()
+        .args(["theme", "show", "x"])
+        .output()
+        .expect("run theme show");
+    assert!(theme.status.success());
+    let theme = String::from_utf8_lossy(&theme.stdout);
+    assert!(theme.contains("name: x"));
+    assert!(theme.contains("\"name\": \"x\""));
+
+    let layout = xtop()
+        .args(["layout", "show", "Dashboard"])
+        .output()
+        .expect("run layout show");
+    assert!(layout.status.success());
+    let layout = String::from_utf8_lossy(&layout.stdout);
+    assert!(layout.contains("name: Dashboard"));
+    assert!(layout.contains("\"name\": \"Dashboard\""));
+}
+
+#[test]
+fn completions_are_available_for_common_shells() {
+    for shell in ["bash", "zsh", "fish", "powershell"] {
+        let out = xtop()
+            .args(["completions", shell])
+            .output()
+            .expect("run completions");
+        assert!(out.status.success(), "completions failed for {shell}");
+        assert!(
+            String::from_utf8_lossy(&out.stdout).contains("xtop"),
+            "completion output missing xtop for {shell}"
+        );
+    }
 }
 
 #[test]

@@ -48,6 +48,16 @@ pub fn layout_command(args: &[String]) -> anyhow::Result<()> {
             cmd_current();
             Ok(())
         }
+        "show" => {
+            if help::wants_help(&args[3..]) {
+                help::show(help::LAYOUT_SHOW);
+                return Ok(());
+            }
+            let Some(name) = args.get(3) else {
+                help::usage_error(help::LAYOUT_SHOW, "Usage: xtop layout show <layout>");
+            };
+            cmd_show(name)
+        }
         "set" => {
             if help::wants_help(&args[3..]) {
                 help::show(help::LAYOUT_SET);
@@ -229,4 +239,73 @@ fn cmd_check(path: &Path) -> anyhow::Result<()> {
         }
         Err(e) => anyhow::bail!("INVALID {} -> {e}", path.display()),
     }
+}
+
+fn cmd_show(name: &str) -> anyhow::Result<()> {
+    let defs = load_layout_defs();
+    let Some(def) = defs
+        .iter()
+        .find(|def| def.name == name)
+        .or_else(|| defs.iter().find(|def| def.name.eq_ignore_ascii_case(name)))
+    else {
+        anyhow::bail!("unknown layout '{name}'; install it with 'xtop layout download \"{name}\"'");
+    };
+    let installed = installed_by_name(AssetKind::Layout, &def.name);
+    let source = if def.name == "Dashboard" {
+        "base"
+    } else if installed.is_some() {
+        "downloaded"
+    } else {
+        "user"
+    };
+    println!("name: {}", def.name);
+    println!("source: {source}");
+    if let Some((path, _)) = layout_source(&def.name) {
+        println!("path: {}", path.display());
+    }
+    if let Some(installed) = installed {
+        println!(
+            "version: {}  author: {}  license: {}",
+            installed.version, installed.author, installed.license
+        );
+    }
+    println!();
+    match layout_source(&def.name) {
+        Some((_, source)) => print!("{source}"),
+        None => println!("(source file not found; using the embedded definition)"),
+    }
+    Ok(())
+}
+
+fn layout_source(name: &str) -> Option<(std::path::PathBuf, String)> {
+    let dir = assets::layouts_dir();
+    if let Ok(entries) = fs::read_dir(&dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let extension = path.extension().and_then(|ext| ext.to_str());
+            if !matches!(extension, Some("json") | Some("jsonc")) {
+                continue;
+            }
+            let Ok(source) = fs::read_to_string(&path) else {
+                continue;
+            };
+            if xtop_layout::parse_layout(&source)
+                .map(|layout| layout.name == name)
+                .unwrap_or(false)
+            {
+                return Some((path, source));
+            }
+        }
+    }
+    if name == "Dashboard" {
+        for &(stem, source) in assets::base_layout_sources() {
+            if stem == "dashboard" {
+                return Some((
+                    std::path::PathBuf::from("<embedded dashboard>"),
+                    source.to_string(),
+                ));
+            }
+        }
+    }
+    None
 }

@@ -51,6 +51,7 @@
   <li>Configurable alert thresholds</li>
   <li>Persistent configuration</li>
   <li>Runtime widgets: sandboxed WASM modules or helper processes (Lua, Python, ...) via the opt-in <code>plugin-wasm</code> / <code>plugin-external</code> features</li>
+  <li>Headless CLI monitoring: <code>status</code>, <code>processes</code>, <code>watch</code>, <code>info</code> and <code>doctor</code> with JSON output</li>
   <li>Theme and layout management from the CLI (<code>xtop theme</code>, <code>xtop layout</code>, <code>--change-theme</code>, <code>--gen-config</code>), followed live by running instances</li>
 </ul>
 

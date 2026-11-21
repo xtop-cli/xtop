@@ -4,6 +4,18 @@
 
 <hr>
 
+<h2 id="headless-cli">Headless CLI</h2>
+
+<ul>
+  <li><code>xtop status</code> prints a one-shot system snapshot; <code>--json</code> emits a stable schema.</li>
+  <li><code>xtop processes</code> prints a sortable, filterable process list with optional JSON output.</li>
+  <li><code>xtop watch</code> repeats the snapshot at a configurable interval and can emit JSON Lines.</li>
+  <li><code>xtop info</code> and <code>xtop doctor</code> report build features, paths, assets and local prerequisites without starting the TUI.</li>
+  <li><code>xtop completions</code> prints bash, zsh, fish or PowerShell completions.</li>
+</ul>
+
+<hr>
+
 <h2 id="system-monitoring">System Monitoring</h2>
 
 <h3 id="cpu">CPU</h3>

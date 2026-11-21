@@ -24,6 +24,7 @@ xtop
 xtop <command> [arguments]
 xtop --change-theme <theme>
 xtop --gen-config
+xtop --version
 xtop --help
 ```
 
@@ -36,6 +37,7 @@ argument also starts the TUI; this preserves the original entry behavior.
 | --- | --- |
 | `--change-theme <theme>` | Change the active theme and persist it to `config.json`. Running instances pick up the change on the next tick. `--ct` remains accepted as a deprecated alias. |
 | `--gen-config` | Create `config.json`, `themes/x.jsonc` and `layouts/dashboard.jsonc` when missing. |
+| `-V`, `--version` | Print the package version and exit. |
 | `-h`, `--help` | Print global help and exit. |
 
 ## Commands
@@ -43,16 +45,24 @@ argument also starts the TUI; this preserves the original entry behavior.
 | Command | Description |
 | --- | --- |
 | `xtop` | Start the interactive TUI system monitor. |
+| `xtop status` | Print a one-shot system snapshot. |
+| `xtop processes` | Print a one-shot process list. |
+| `xtop watch` | Print periodic system snapshots. |
+| `xtop info` | Show build, path and tool information. |
+| `xtop doctor` | Diagnose the local installation. |
+| `xtop completions <shell>` | Print bash, zsh, fish or PowerShell completions. |
 | `xtop mcp` | Start the MCP server over stdio for AI agents. |
 | `xtop theme list` | List installed themes. |
 | `xtop theme available` | List the official theme catalog. |
 | `xtop theme current` | Print the persisted theme. |
+| `xtop theme show <theme>` | Show an installed theme and its palette. |
 | `xtop theme set <theme>` | Persist the active theme. |
 | `xtop theme download <theme>` | Install one theme, or all themes with `--all`, from the catalog. |
 | `xtop theme path` | Print the user themes directory. |
 | `xtop layout list` | List effective installed layouts. |
 | `xtop layout available` | List the official layout catalog. |
 | `xtop layout current` | Print the persisted layout. |
+| `xtop layout show <layout>` | Show an installed layout and its JSONC source. |
 | `xtop layout set <layout>` | Persist the active layout. |
 | `xtop layout download <layout>` | Install one layout, or all layouts with `--all`, from the catalog. |
 | `xtop layout install <layout>` | Alias for `layout download`; accepts the same `--all` flag. |
@@ -60,6 +70,10 @@ argument also starts the TUI; this preserves the original entry behavior.
 | `xtop layout path` | Print the user layouts directory. |
 | `xtop config download <name>` | Download a theme or layout by name, or everything with `--all`. |
 | `xtop config generate` | Create the base config and assets. |
+| `xtop config get <key.path>` | Print one configuration value. |
+| `xtop config set <key.path> <value>` | Update and validate a configuration value. |
+| `xtop config list` | Print the effective configuration as JSON. |
+| `xtop config reset --yes` | Restore `config.json` to defaults. |
 | `xtop config path` | Print config and asset directories. |
 | `xtop plugin list` | List plugins wired into the kernel manifest. |
 | `xtop plugin install <name\|url>` | Add a plugin as an optional git dependency and feature. |
@@ -77,6 +91,76 @@ xtop
 Starts the interactive system monitor. Keybindings, layouts, fullscreen
 mode, process search and the command palette are documented in
 [usage.md](usage.md).
+
+## Headless monitoring
+
+These commands do not start the TUI and are intended for scripts, terminals
+without a full-screen session and quick checks.
+
+### `xtop status`
+
+```
+xtop status [--json]
+```
+
+Samples CPU, memory, swap, load, uptime, disks, network interfaces,
+batteries and GPUs. The sampler takes two samples with a short pause so CPU
+and rate values are meaningful in the first output.
+
+`--json` prints one machine-readable object with schema version 1.
+
+### `xtop processes`
+
+```
+xtop processes [--json] [--sort cpu|memory|pid|name] [--asc|--desc]
+               [--limit N] [--filter TEXT]
+```
+
+Prints a process table. CPU and memory are sampled over a short interval.
+The default sort is CPU descending and the default limit is 20; `--limit 0`
+prints every process in the snapshot. `--filter` matches process names.
+`--json` omits the process environment and full argv.
+
+### `xtop watch`
+
+```
+xtop watch [--json|--jsonl] [--interval MS] [--count N]
+```
+
+Repeats the status snapshot. The default interval is 1000 ms; values below
+100 ms are clamped. Without `--count`, the command runs until it is
+interrupted. `--jsonl` (and `--json`) prints one compact JSON object per
+sample.
+
+## Diagnostics
+
+### `xtop info`
+
+```
+xtop info [--json]
+```
+
+Prints the version, target, enabled features, config/asset paths, local
+asset-file counts and whether `curl`, `git` and `cargo` are available.
+
+### `xtop doctor`
+
+```
+xtop doctor [--json]
+```
+
+Checks config-directory writability, `config.json` and `assets.json`
+parsing, the base theme/layout files, the catalog URL and external tools.
+Warnings do not fail; failed checks exit with status 1.
+
+## Shell completions
+
+```
+xtop completions <bash|zsh|fish|powershell>
+```
+
+Prints a completion script to stdout. Source it from the shell startup file
+or install it in the shell's completion directory.
 
 ## MCP server
 
@@ -129,6 +213,15 @@ xtop theme current
 ```
 
 Prints the theme persisted in `config.json`.
+
+### `xtop theme show`
+
+```
+xtop theme show <theme>
+```
+
+Prints source, optional path and version/author/license metadata, followed by
+the normalized theme model as JSON.
 
 ### `xtop theme set`
 
@@ -196,6 +289,15 @@ xtop layout current
 
 Prints the layout persisted in `config.json`, or the current layout mode
 when no name is set.
+
+### `xtop layout show`
+
+```
+xtop layout show <layout>
+```
+
+Prints source, optional path and metadata, followed by the JSONC source when
+the layout is stored in the user layouts directory.
 
 ### `xtop layout set`
 
@@ -276,6 +378,50 @@ xtop config path
 Prints the config directory, themes directory, layouts directory and
 installed-assets manifest path.
 
+### `xtop config get`
+
+```
+xtop config get <key.path>
+```
+
+Prints the selected effective configuration value. Strings are printed raw;
+objects and arrays are printed as pretty JSON. Paths use dots and array
+indices, for example `alerts.cpu_high` or `keybindings.quit.0`.
+
+### `xtop config set`
+
+```
+xtop config set <key.path> <value>
+```
+
+Parses the value as JSON when possible, otherwise as a string, then validates
+the whole configuration before saving. Theme and layout names are checked
+against the installed set. Examples:
+
+```sh
+xtop config set theme x
+xtop config set update_interval_ms 500
+xtop config set alerts.cpu_high 80
+xtop config set keybindings.quit '["q","ctrl+q"]'
+```
+
+### `xtop config list`
+
+```
+xtop config list
+```
+
+Prints the effective configuration as pretty JSON.
+
+### `xtop config reset`
+
+```
+xtop config reset --yes
+```
+
+Restores the default configuration. `--yes` is required to avoid an
+accidental reset.
+
 ### Catalog and installed metadata
 
 The official catalog is `catalog.json` at the root of the
@@ -286,8 +432,9 @@ The official catalog is `catalog.json` at the root of the
 - `file` (safe destination file name), `url` (raw asset URL) and `sha256`.
 
 The default catalog URL is
-`https://raw.githubusercontent.com/xtop-cli/xtop/main/catalog.json`; set
-`XTOP_CATALOG_URL` to use a local file, mirror or test catalog.
+`https://raw.githubusercontent.com/xtop-cli/xtop/main/catalog.json`. Release
+branches fall back to their release catalog while the file is not yet on
+`main`. Set `XTOP_CATALOG_URL` to use a local file, mirror or test catalog.
 
 Downloads are recorded in `$XDG_CONFIG_HOME/xtop/assets.json` (or the
 platform equivalent) with version, author, license and checksum metadata.
@@ -423,10 +570,22 @@ macOS and Windows use their platform configuration directories; see
 # Start the TUI
 xtop
 
-# Print global help and scoped help
+# Print version, global help and scoped help
+xtop --version
 xtop --help
 xtop theme --help
 xtop theme download --help
+
+# Headless monitoring
+xtop status
+xtop status --json
+xtop processes --sort memory --limit 10
+xtop watch --count 5 --interval 2000
+xtop info
+xtop doctor
+
+# Shell completions
+xtop completions bash
 
 # Create the base configuration without starting the TUI
 xtop --gen-config
@@ -445,6 +604,12 @@ xtop layout set "CPU Focus"
 
 # Install everything from the official catalog
 xtop config download --all
+
+# Configuration management
+xtop config get theme
+xtop config set update_interval_ms 500
+xtop config list
+xtop config reset --yes
 
 # Change the theme of a running instance
 xtop --change-theme madrid
