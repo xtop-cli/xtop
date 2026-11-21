@@ -1,6 +1,15 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.1] - 2026-11-21
+
+- Split the kernel into core, cli and tui layers with unix, windows and
+  fallback terminal backends.
+- Added external theme and layout assets, the catalog downloader, addon
+  management and the installable Process Tree layout.
+- Added the interactive command bar, plugin enable/disable persistence,
+  headless status/processes/watch commands, info/doctor, completions and
+  self-update with installation-medium detection.
+- Updated GPL-3.0-or-later licensing, docs, tests and the structural audit.
 
 Security-hardening pass (release/v0.1.0 branch):
 

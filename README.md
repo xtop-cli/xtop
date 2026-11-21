@@ -4,7 +4,7 @@
 <div align="center">
 
 ![Rust](https://img.shields.io/badge/Rust-1.87%2B-orange)
-![License](https://img.shields.io/badge/license-MIT-blue)
+![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)
 ![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey)
 ![ratatui](https://img.shields.io/badge/built%20with-ratatui-red)
 
@@ -45,13 +45,15 @@
   <li>Process list with live search, CPU/Memory/PID/Name sorting and ▲/▼ direction toggling</li>
   <li>Battery monitoring (real probes on Linux, macOS and Windows)</li>
   <li>GPU monitoring (NVIDIA via <code>nvidia-smi</code> on any platform; AMD/Intel via Linux sysfs probes)</li>
-  <li>12 color themes with custom theme support via JSONC</li>
-  <li>7 built-in layout modes + 3 Detail preset layouts, with custom layout support via JSONC</li>
+  <li>12 color themes, with the base theme embedded and the rest installable from the official catalog</li>
+  <li>Layout modes and Detail presets, with Dashboard embedded and the rest installable from the official catalog</li>
   <li>Full-screen mode for any widget</li>
   <li>Configurable alert thresholds</li>
   <li>Persistent configuration</li>
   <li>Runtime widgets: sandboxed WASM modules or helper processes (Lua, Python, ...) via the opt-in <code>plugin-wasm</code> / <code>plugin-external</code> features</li>
-  <li>Theme switching from the CLI (<code>xtop --ct &lt;theme&gt;</code>), followed live by running instances</li>
+  <li>Self-update through the detected installation medium: <code>xtop update</code></li>
+  <li>Headless CLI monitoring: <code>status</code>, <code>processes</code>, <code>watch</code>, <code>info</code> and <code>doctor</code> with JSON output</li>
+  <li>Theme and layout management from the CLI (<code>xtop theme</code>, <code>xtop layout</code>, <code>--change-theme</code>, <code>--gen-config</code>), followed live by running instances</li>
 </ul>
 
 <p>See <a href="docs/features.md">docs/features.md</a> for a detailed feature breakdown.</p>
@@ -121,7 +123,7 @@
 
 <pre><code>irm https://raw.githubusercontent.com/xtop-cli/xtop/main/install-prebuilt.ps1 | iex</code></pre>
 
-<p>Pin a version with <code>--version 0.1.0</code> (or <code>-Version 0.1.0</code> on Windows). The installers verify the release <code>SHA256SUMS</code> and, when cosign is available, the keyless signature. See <a href="docs/installation.md">docs/installation.md</a> for prefixes and verification flags.</p>
+<p>Pin a version with <code>--version 0.1.1</code> (or <code>-Version 0.1.1</code> on Windows). The installers verify the release <code>SHA256SUMS</code> and, when cosign is available, the keyless signature. See <a href="docs/installation.md">docs/installation.md</a> for prefixes and verification flags.</p>
 
 <h3>From source</h3>
 
@@ -159,7 +161,8 @@ cargo run --release</code></pre>
     <tr><td><kbd>t</kbd> / <kbd>T</kbd></td><td>Next / previous theme</td></tr>
     <tr><td><kbd>l</kbd></td><td>Next layout mode</td></tr>
     <tr><td><kbd>f</kbd> / <kbd>F</kbd></td><td>Toggle / cycle full-screen</td></tr>
-    <tr><td><kbd>/</kbd></td><td>Search processes</td></tr>
+    <tr><td><kbd>/</kbd> / <kbd>ctrl+p</kbd></td><td>Open the command bar</td></tr>
+    <tr><td><kbd>ctrl+f</kbd></td><td>Filter processes</td></tr>
   </tbody>
 </table>
 
@@ -173,6 +176,8 @@ cargo run --release</code></pre>
   <li><a href="docs/features.md">Features</a> -- detailed feature breakdown</li>
   <li><a href="docs/installation.md">Installation</a> -- full install and uninstall guide</li>
   <li><a href="docs/usage.md">Usage</a> -- keybindings, modules, help overlay</li>
+  <li><a href="docs/commands.md">Commands</a> -- complete CLI reference and per-command help</li>
+  <li><a href="docs/core.md">Kernel core</a> -- reusable core architecture and responsibilities</li>
   <li><a href="docs/configuration.md">Configuration</a> -- config file and settings reference</li>
   <li><a href="docs/customization.md">Customization</a> -- custom themes and layouts</li>
   <li><a href="docs/colors.md">Colors</a> -- palette reference for the 12 shipped themes</li>
@@ -185,6 +190,10 @@ cargo run --release</code></pre>
 </ul>
 
 <hr>
+
+<h2 id="license">License</h2>
+
+<p>GPL-3.0-or-later. See <a href="LICENSE">LICENSE</a>.</p>
 
 <div id="x" align="center">
 <h2>X</h2>

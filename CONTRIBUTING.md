@@ -16,8 +16,8 @@ First off, thank you for considering contributing to `xtop`! It's people like yo
 1. Fork the repository and create your branch from `main`.
 2. Ensure you have installed the necessary dependencies (Rust & Cargo).
 3. Make your changes and test them locally using `cargo run`.
-4. Run `cargo fmt` and `cargo clippy` to ensure code quality and formatting.
-5. Run the local gate: `./scripts/ci.sh && ./scripts/audit.sh`.
+4. Format the workspace with `cargo fmt --all`.
+5. Run the local gate: `./scripts/ci.sh` (includes the formatting check, clippy, tests, the no-default build and the structural audit).
 6. Create a pull request. Make sure the PR description clearly describes the problem and solution. Include the relevant issue number if applicable.
 
 ## Development Setup

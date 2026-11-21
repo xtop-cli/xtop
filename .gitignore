@@ -6,3 +6,18 @@
 # Scaffolded plugins and widget packs (dev-time tooling)
 /plugins-dev
 /widgets-dev
+
+# Editors and OS
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Local logs and temporary files
+*.log
+*.tmp
+*.orig
+*.rej

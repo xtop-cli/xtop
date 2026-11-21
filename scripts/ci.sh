@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-# Local CI for the xtop kernel repo (single-crate layout).
+# Local CI for the xtop kernel repo (single package: library + binary).
 #
-# Intentionally NOT wired into git: no GitHub Actions, no git hooks. Run it
-# yourself from the repo root:
+# Run it locally from the repo root (the existing GitHub workflow calls the
+# same script, so local and remote gates stay identical):
 #
 #   ./scripts/ci.sh            # run every stage
 #   ./scripts/ci.sh fmt        # run one stage
+#   ./scripts/ci.sh audit      # run only the structural audit
 #
-# Stages: fmt | clippy | check | test | no-default
+# Stages: fmt | clippy | check | test | no-default | audit
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -18,7 +19,7 @@ if [[ ! -f Cargo.toml ]]; then
     exit 0
 fi
 
-stages=(fmt clippy check test no-default)
+stages=(fmt clippy check test no-default audit)
 requested=("$@")
 if [[ ${#requested[@]} -eq 0 ]]; then
     requested=("${stages[@]}")
@@ -50,6 +51,11 @@ no_default() {
     cargo check --no-default-features
 }
 
+audit() {
+    echo "==> structural audit (full kernel)"
+    ./scripts/audit.sh
+}
+
 for stage in "${requested[@]}"; do
     case "$stage" in
         fmt) fmt ;;
@@ -57,6 +63,7 @@ for stage in "${requested[@]}"; do
         check) check ;;
         test) test ;;
         no-default) no_default ;;
+        audit) audit ;;
         *)
             echo "[ci] unknown stage: $stage (expected one of: ${stages[*]})" >&2
             exit 1

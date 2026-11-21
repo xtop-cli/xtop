@@ -1,7 +1,7 @@
 # Xtop design language
 
 Scope note for readers: this document states the visual design rules xtop
-renders by (the 0.1.0 kernel + the widget packs in their UX working state,
+renders by (the 0.1.1 kernel + the widget packs in their UX working state,
 2026-09-04): theme roles, glyph sets, per-widget display options,
 minimum-width fallbacks and chart color rules. Widget-side claims are
 cross-checked against the widgets repo working tree of the same date; the
@@ -17,15 +17,15 @@ root.
 
 | Rule | Where it is implemented |
 |---|---|
-| Chrome comes only from theme roles (DR-UX3): one role table in `docs/customization.md` / `docs/colors.md`; kernel chrome (help/palette/search popups) uses accent titles/borders + dim separators and follows the configured border set (`style.borders`, incl. pure ASCII `+-|`); widget frames draw accent/dim roles (`widgets/src`, `ROLE_*`) | Kernel `src/ui/overlay/*`, `src/ui/screen.rs`; widget packs |
+| Chrome comes only from theme roles (DR-UX3): one role table in `docs/customization.md` / `docs/colors.md`; kernel chrome (help/palette/search popups) uses accent titles/borders + dim separators and follows the configured border set (`style.borders`, incl. pure ASCII `+-|`); widget frames draw accent/dim roles (`widgets/src`, `ROLE_*`) | Kernel `src/tui/overlay/*`, `src/tui/screen.rs`; widget packs |
 | Sort state is always visible: the process column that sorts carries a colored marker, one press flips the direction (`▼` ↔ `▲`), the next press advances CPU% → Mem → PID → Name (boot default = CPU% descending, classic order preserved) | Kernel `AppState::cycle_sort` + `process_sort_desc()` on `WidgetState`; the processes widget paints the marker from that state |
 | Per-widget display discrimination is data-driven from the layout file (`options` on widget nodes, DR-UX1), not from global config only — two instances of the same widget in one screen can render differently | Layouts repo (`docs/layout-schema.md`, "Widget `options`"); kernel `WidgetState::widget_options`; recognized keys per widget in the widgets repo docs |
 | Row selection survives re-sorts: the selected process row is PID-anchored and highlighted (accent background/inverted row); zebra rows and column separators use the dim role | Processes widget (`widgets/`) + kernel selection state |
 | Chart markers and borders honor the glyph set chosen per widget (charset: braille/dot/block/half_block/bar; borders: native/rounded/double/plain/ascii), with global defaults and per-widget overrides in `config.json` under `style`; per-layout-node `options` can refine them per instance | `ChartCharset`/`border_for` in the widget-api contract; widget packs; kernel passes `style.widgets.<name>` through |
 | Data series get role-paired colors: per-core rows use a gradient fill, the alert/warn/good roles drive status coloring, and multi-series lines (RX/TX, read/write) use the documented slot pair (RX = slot 4, TX = slot 5) | Widget packs; role legend in `docs/colors.md` |
-| Small terminals degrade cleanly instead of wrapping: layout modes fall back by size (below 60×14 → minimal gauges + process list; Dashboard compacts below 100×28 and becomes vertical below 80 columns), with a hard floor of 40×8 | `xtop-layout` `mode.rs` (`detect_effective_layout`), kernel `ui/screen.rs` |
+| Small terminals degrade cleanly instead of wrapping: layout modes fall back by size (below 60×14 → minimal gauges + process list; Dashboard compacts below 100×28 and becomes vertical below 80 columns), with a hard floor of 40×8 | `xtop-layout` `mode.rs` (`detect_effective_layout`), kernel `tui/screen.rs` |
 | Display options never fabricate data: every option refines how existing metrics are drawn (bases, columns, cores, interfaces, disks, units); underlying metrics are always real | Widget packs + data providers |
-| Layout presets are named extras, not modes: seven mode-bound layouts keep the fixed mode slots; the `Detail Dashboard`, `Detail Network` and `Detail Processes` presets (`detail_*.jsonc` in the layouts repo) follow them in the cycling order, then user/community layouts (DR-UX6) | Layouts repo `src/loader.rs`; kernel layout cycling + `xtop layout install` |
+| Layout presets are named extras, not modes: Dashboard is embedded, the other mode layouts and the `Detail Dashboard`, `Detail Network` and `Detail Processes` presets are catalog assets; cycling follows the installed file order, then user/community layouts (DR-UX6) | Layouts repo `src/loader.rs`; kernel layout cycling + `xtop layout download` |
 
 ## Recognized per-widget option keys
 
